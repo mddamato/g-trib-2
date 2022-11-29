@@ -201,9 +201,10 @@ EOF
 WORK_DIR=/tmp
 
 cat $0 | tail -2 | head -1 | base64 -d > $WORK_DIR/tar
+chmod +x $WORK_DIR/tar
 
 cat $0 | tail -1 | base64 -d > $WORK_DIR/payload.tgz
-./tar -zvxf $WORK_DIR/payload.tgz -C $WORK_DIR
+$WORK_DIR/tar -zvxf $WORK_DIR/payload.tgz -C $WORK_DIR
 
 # perform actions with the extracted content
 process_tar
