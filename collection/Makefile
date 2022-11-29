@@ -34,10 +34,19 @@ preflight-check:
 .PHONY: collect-rke2-dependencies
 collect-rke2-dependencies: preflight-check
 	mkdir -p ${ENV_BUILD_CACHE}/rke2;
-	docker run -it -p 5050:5000 --rm --name bundler \
+	podman run -it -p 5050:5000 --rm --name bundler \
 	-w /workingdir \
 	--mount type=bind,source="`pwd`/scripts",target=/scripts \
 	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir \
 	--entrypoint /bin/sh \
 	-e INSTALL_RKE2_VERSION=${RKE2_VERSION} \
 	rockylinux:8 /scripts/collect_rke2_dependencies.sh;
+
+
+# compress all files previously collected
+.PHONY: compress-all
+compress-all: preflight-check
+	tar -C ${ENV_BUILD_CACHE} -czf ${ENV_BUILD_CACHE}/to_the_airgap.tgz rke2 
+# glowing-tribble.tar registrydb.tar.gz registry_image.tar dep_spec.tar cert-manager.tar fileserver
+	cp scripts/deploy.sh ${ENV_BUILD_CACHE}/to_the_airgap.sh
+	cat ${ENV_BUILD_CACHE}/to_the_airgap.tgz >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
