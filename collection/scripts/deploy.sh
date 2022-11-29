@@ -204,7 +204,7 @@ WORK_DIR=/tmp
 #tail -n +${PAYLOAD_LINE} $0 | tar -zpvx -C $WORK_DIR
 
 #cat $WORK_DIR/payload.tgz.b64 | base64 -d > payload.tgz
-cat $0 | tail -1 | head -1 | base64 -d > payload.tgz
+cat $0 | tail -1 | head -1 | base64 -d > $WORK_DIR/payload.tgz
 tar -zvxf $WORK_DIR/payload.tgz -C $WORK_DIR
 
 # perform actions with the extracted content
