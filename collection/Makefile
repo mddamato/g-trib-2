@@ -38,7 +38,7 @@ collect-tar-rpm: preflight-check
 	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir \
 	--entrypoint /bin/sh \
 	-e INSTALL_RKE2_VERSION=${RKE2_VERSION} \
-	rockylinux:$${releasever} -c "cp /usr/bin/tar .cache/tar"; \
+	rockylinux:$${releasever} -c "cp /usr/bin/tar .cache/"; \
 	done
 
 
