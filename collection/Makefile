@@ -49,11 +49,7 @@ compress-all: preflight-check
 	tar -C ${ENV_BUILD_CACHE} -czf ${ENV_BUILD_CACHE}/payload.tgz rke2 
 # glowing-tribble.tar registrydb.tar.gz registry_image.tar dep_spec.tar cert-manager.tar fileserver
 	rm -f ${ENV_BUILD_CACHE}/to_the_airgap.sh;
-	touch ${ENV_BUILD_CACHE}/to_the_airgap.sh;
-
-	echo '#!/bin/bash' > ${ENV_BUILD_CACHE}/to_the_airgap.sh
-
-	cat scripts/deploy.sh >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
+	cp scripts/deploy.sh ${ENV_BUILD_CACHE}/to_the_airgap.sh
 
 	cat ${ENV_BUILD_CACHE}/payload.tgz | base64 -w0 >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
 # cat ${ENV_BUILD_CACHE}/payload.tgz >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
