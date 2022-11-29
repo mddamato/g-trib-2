@@ -48,6 +48,7 @@ collect-rke2-dependencies: preflight-check
 compress-all: preflight-check
 	tar -C ${ENV_BUILD_CACHE} -czf ${ENV_BUILD_CACHE}/payload.tgz rke2 
 # glowing-tribble.tar registrydb.tar.gz registry_image.tar dep_spec.tar cert-manager.tar fileserver
+	rm -f ${ENV_BUILD_CACHE}/to_the_airgap.sh;
 	cp scripts/deploy.sh ${ENV_BUILD_CACHE}/to_the_airgap.sh
 # cat ${ENV_BUILD_CACHE}/payload.tgz >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
 
@@ -66,6 +67,6 @@ compress-all: preflight-check
 # r ${ENV_BUILD_CACHE}/payload.tgz.b64
 # }' ${ENV_BUILD_CACHE}/to_the_airgap.sh
 
-	echo 'cat < EOF' >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
+	echo 'cat > payload.tar.b64 << EOF' >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
 	echo $(cat payload.tar | base64 -w0) >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
 	echo 'EOF' >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
