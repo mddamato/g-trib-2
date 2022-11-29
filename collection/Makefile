@@ -14,14 +14,10 @@ export
 .PHONY: help
 help:
 	@echo Options:
-	@echo collect-rke2-dependencies
-	@echo collect-glowing-tribble
-	@echo collect-registry-artifacts
-	@echo collect-deployment-specs
-	@echo collect-cert-manager-artifacts
-	@echo collect-fileserver-artifacts
 	@echo compress-all
-	@echo collect-all
+	@echo collect-rke2-dependencies
+	@echo collect-tar-rpm
+
 
 .PHONY: preflight-check
 preflight-check:
@@ -36,7 +32,7 @@ preflight-check:
 collect-tar-rpm: preflight-check
 	mkdir -p ${ENV_BUILD_CACHE}/tar_rpm;
 	for releasever in 8 9 ; do \
-	docker run -i -p 5050:5000 --rm --name bundler \
+	podman run -i -p 5050:5000 --rm --name bundler \
 	-w /workingdir \
 	--mount type=bind,source="`pwd`/scripts",target=/scripts \
 	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir \
@@ -51,7 +47,7 @@ collect-tar-rpm: preflight-check
 .PHONY: collect-rke2-dependencies
 collect-rke2-dependencies: preflight-check
 	mkdir -p ${ENV_BUILD_CACHE}/rke2;
-	docker run -it -p 5050:5000 --rm --name bundler \
+	podman run -it -p 5050:5000 --rm --name bundler \
 	-w /workingdir \
 	--mount type=bind,source="`pwd`/scripts",target=/scripts \
 	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir \
