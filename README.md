@@ -7,6 +7,8 @@ Requirements:
 - yum install -y make git podman
 - git clone https://github.com/mddamato/g-trib-2.git
 
+Example command:
+- make collect-rke2-dependencies ENVIRONMENT=my-env
 Dependencies to collect:
 - RKE2 single node airgap script tar file
 - registry image tar file

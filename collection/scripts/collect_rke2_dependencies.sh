@@ -9,6 +9,8 @@ SKIP_IMAGES_DL=${SKIP_IMAGES_DL:-'false'}
 
 setup_env() {
 
+  alias docker=podman
+
   INSTALL_RKE2_CHANNEL="stable"
   INSTALL_RKE2_METHOD="yum"
   # --- bail if we are not root ---
