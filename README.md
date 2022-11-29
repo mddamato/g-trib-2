@@ -5,7 +5,8 @@
 Requirements:
 - alias docker=podman
 - yum install -y make git podman
-- git clone https://github.com/mddamato/g-trib-2.git
+- sysctl user.max_user_namespaces=15000 
+- git clone https://github.com/mddamato/g-trib-2.git /opt/g-trib-2
 
 Example command:
 - make collect-rke2-dependencies ENVIRONMENT=my-env
