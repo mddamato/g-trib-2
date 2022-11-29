@@ -192,6 +192,8 @@ EOF
 # IPADDR=`ip -f inet addr show ens192 | awk '/inet / {print $2}' | awk -F\/ '{print $1}'`
 # echo "${IPADDR}   glowing-tribble" >> /etc/hosts
 
+yum install -y tar;
+
 # line number where payload starts
 PAYLOAD_LINE=$(awk '/^__PAYLOAD_BEGINS__/ { print NR + 1; exit 0; }' $0)
 
