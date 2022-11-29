@@ -38,7 +38,7 @@ collect-tar-rpm: preflight-check
 	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir \
 	--entrypoint /bin/sh \
 	-e INSTALL_RKE2_VERSION=${RKE2_VERSION} \
-	rockylinux:$${releasever} -c "yum install -y tar --releasever=/ --installroot=/workingdir --downloadonly --downloaddir .cache/tar_rpm"; \
+	rockylinux:$${releasever} -c "cp /usr/bin/tar .cache/tar"; \
 	done
 
 
@@ -68,7 +68,7 @@ compress-all: preflight-check
 	cp scripts/deploy.sh ${ENV_BUILD_CACHE}/to_the_airgap.sh
 
 	# add the tar rpm to the end of to_the_airgap.sh
-	cat ${ENV_BUILD_CACHE}/tar*.el8.*.rpm | base64 -w0 >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
+	cat ${ENV_BUILD_CACHE}/tar | base64 -w0 >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
 
 	# add the tar payload to the end of to_the_airgap.sh
 	cat ${ENV_BUILD_CACHE}/payload.tgz | base64 -w0 >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
