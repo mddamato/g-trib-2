@@ -60,6 +60,6 @@ compress-all: preflight-check
 #	sed "s/payloadbase64/$(cat ${ENV_BUILD_CACHE}/payload.tgz | base64 -w0)/g" -i ${ENV_BUILD_CACHE}/to_the_airgap.sh
 	cat ${ENV_BUILD_CACHE}/payload.tgz | base64 -w0 > ${ENV_BUILD_CACHE}/payload.tgz.b64
 	sed -i '/payloadbase64/{
-	s/fox//g
+	s/payloadbase64//g
 	r ${ENV_BUILD_CACHE}/payload.tgz.b64
 	}' ${ENV_BUILD_CACHE}/to_the_airgap.sh
