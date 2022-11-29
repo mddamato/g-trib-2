@@ -34,8 +34,7 @@ preflight-check:
 .PHONY: collect-rke2-dependencies
 collect-rke2-dependencies: preflight-check
 	mkdir -p ${ENV_BUILD_CACHE}/rke2;
-	alias docker=podman;
-	docker run -it -p 5050:5000 --rm --name bundler \
+	podman run -it -p 5050:5000 --rm --name bundler \
 	-w /workingdir \
 	--mount type=bind,source="`pwd`/scripts",target=/scripts \
 	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir \
