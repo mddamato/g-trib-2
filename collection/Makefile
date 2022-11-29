@@ -31,7 +31,7 @@ preflight-check:
 .PHONY: collect-tar-rpm
 collect-tar-rpm: preflight-check
 	mkdir -p ${ENV_BUILD_CACHE}/tar_rpm;
-	for releasever in 8 9 ; do \
+	for releasever in 8 ; do \
 	podman run -i -p 5050:5000 --rm --name bundler \
 	-w /workingdir \
 	--mount type=bind,source="`pwd`/scripts",target=/scripts \
