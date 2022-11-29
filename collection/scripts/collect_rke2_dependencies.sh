@@ -6,7 +6,7 @@
 set -e
 
 SKIP_IMAGES_DL=${SKIP_IMAGES_DL:-'false'}
-alias docker=podman
+
 setup_env() {
 
 

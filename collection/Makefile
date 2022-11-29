@@ -41,3 +41,12 @@ collect-rke2-dependencies: preflight-check
 	--entrypoint /bin/sh \
 	-e INSTALL_RKE2_VERSION=${RKE2_VERSION} \
 	rockylinux:8 /scripts/collect_rke2_dependencies.sh;
+
+
+# compress all files previously collected
+.PHONY: compress-all
+compress-all: preflight-check
+	tar -C ${ENV_BUILD_CACHE} -czf ${ENV_BUILD_CACHE}/to_the_airgap.tgz rke2 
+# glowing-tribble.tar registrydb.tar.gz registry_image.tar dep_spec.tar cert-manager.tar fileserver
+	cp scripts/deploy.sh ${ENV_CONFIG_DIR}/to_the_airgap.sh
+	cat ${ENV_BUILD_CACHE}/to_the_airgap.tgz >> ${ENV_CONFIG_DIR}/to_the_airgap.sh
