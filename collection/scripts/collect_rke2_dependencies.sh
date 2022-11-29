@@ -261,7 +261,7 @@ if [ "${OLD_ASSETS}" == 1 ]; then
       echo "gpgcheck=0" >> /etc/yum.repos.d/rke_rpm_deps.repo
 
       # Install
-      yum install -y --disablerepo=* --enablerepo="rke_rpm_deps" rke2-\${INSTALL_TYPE}
+      yum install -y --allowerasing --disablerepo=* --enablerepo="rke_rpm_deps" rke2-\${INSTALL_TYPE}
 
     else
 
@@ -335,7 +335,7 @@ else
       echo "gpgcheck=0" >> /etc/yum.repos.d/rke_rpm_deps.repo
 
       # Install
-      yum install -y --disablerepo=* --enablerepo="rke_rpm_deps" rke2-\${INSTALL_TYPE}
+      yum install -y --allowerasing --disablerepo=* --enablerepo="rke_rpm_deps" rke2-\${INSTALL_TYPE}
 
     else
 
