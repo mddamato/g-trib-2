@@ -4,7 +4,7 @@
 
 Requirements:
 - alias docker=podman
-- yum install -y make git
+- yum install -y make git podman
 - git clone https://github.com/mddamato/g-trib-2.git
 
 Dependencies to collect:
