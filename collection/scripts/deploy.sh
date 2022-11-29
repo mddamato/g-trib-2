@@ -195,7 +195,7 @@ EOF
 yum install -y tar;
 
 # line number where payload starts
-PAYLOAD_LINE=$(awk '/^__PAYLOAD_BEGINS__/ { print NR + 1; exit 0; }' $0)
+#PAYLOAD_LINE=$(awk '/^__PAYLOAD_BEGINS__/ { print NR + 1; exit 0; }' $0)
 
 # directory where a tarball is to be extracted
 WORK_DIR=/tmp
@@ -206,14 +206,16 @@ tail -n +${PAYLOAD_LINE} $0 | tar -zpvx -C $WORK_DIR
 # perform actions with the extracted content
 process_tar
 
-exit 0
-__PAYLOAD_BEGINS__
+
+#__PAYLOAD_BEGINS__
 
 
-cat > tar.gz <<EOF
+cat > $WORK_DIR/payload.gz.b64 <<EOF
 payloadbase64
 EOF
+cat $WORK_DIR/payload.gz.b64 | base64 -d > payload.gz
 
-cat > tar.rpm <<EOF
-tarrpmbase64
-EOF
+exit 0
+# cat > tar.rpm <<EOF
+# tarrpmbase64
+# EOF
