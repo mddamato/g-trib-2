@@ -192,19 +192,31 @@ EOF
 # IPADDR=`ip -f inet addr show ens192 | awk '/inet / {print $2}' | awk -F\/ '{print $1}'`
 # echo "${IPADDR}   glowing-tribble" >> /etc/hosts
 
-yum install -y tar;
+#yum install -y tar;
 
 # line number where payload starts
-PAYLOAD_LINE=$(awk '/^__PAYLOAD_BEGINS__/ { print NR + 1; exit 0; }' $0)
+#PAYLOAD_LINE=$(awk '/^__PAYLOAD_BEGINS__/ { print NR + 1; exit 0; }' $0)
 
 # directory where a tarball is to be extracted
 WORK_DIR=/tmp
 
 # extract the embedded tar file
-tail -n +${PAYLOAD_LINE} $0 | tar -zpvx -C $WORK_DIR
+#tail -n +${PAYLOAD_LINE} $0 | tar -zpvx -C $WORK_DIR
+
+#cat $WORK_DIR/payload.tgz.b64 | base64 -d > payload.tgz
+cat $0 | tail -1 | head -1 | base64 -d > $WORK_DIR/payload.tgz
+tar -zvxf $WORK_DIR/payload.tgz -C $WORK_DIR
 
 # perform actions with the extracted content
 process_tar
 
+
+#__PAYLOAD_BEGINS__
+
+
+
+
 exit 0
-__PAYLOAD_BEGINS__
+# cat > tar.rpm <<EOF
+# tarrpmbase64
+# EOF

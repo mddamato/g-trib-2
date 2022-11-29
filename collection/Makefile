@@ -46,7 +46,27 @@ collect-rke2-dependencies: preflight-check
 # compress all files previously collected
 .PHONY: compress-all
 compress-all: preflight-check
-	tar -C ${ENV_BUILD_CACHE} -czf ${ENV_BUILD_CACHE}/to_the_airgap.tgz rke2 
+	tar -C ${ENV_BUILD_CACHE} -czf ${ENV_BUILD_CACHE}/payload.tgz rke2 
 # glowing-tribble.tar registrydb.tar.gz registry_image.tar dep_spec.tar cert-manager.tar fileserver
+	rm -f ${ENV_BUILD_CACHE}/to_the_airgap.sh;
 	cp scripts/deploy.sh ${ENV_BUILD_CACHE}/to_the_airgap.sh
-	cat ${ENV_BUILD_CACHE}/to_the_airgap.tgz >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
+
+	cat ${ENV_BUILD_CACHE}/payload.tgz | base64 -w0 >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
+# cat ${ENV_BUILD_CACHE}/payload.tgz >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
+
+# cat ${ENV_BUILD_CACHE}/payload.tgz | base64 | sed 's/<payloadbase64>/something/g' - ${ENV_BUILD_CACHE}/to_the_airgap.sh
+# cat ${ENV_BUILD_CACHE}/tar.rpm | base64 | awk '{ your_program }' - ${ENV_BUILD_CACHE}/to_the_airgap.sh
+
+# sed s$'\001'"<Doc>###%DOCDATA%###<\/Doc>"$'\001'"<Doc>$(cat ./sample.xml | base64)<\/Doc>"$'\001'g
+
+
+#	sed "s/payloadbase64/$(cat ${ENV_BUILD_CACHE}/payload.tgz | base64 -w0)/g" -i ${ENV_BUILD_CACHE}/to_the_airgap.sh
+
+
+# cat ${ENV_BUILD_CACHE}/payload.tgz | base64 -w0 > ${ENV_BUILD_CACHE}/payload.tgz.b64
+# sed -i '/payloadbase64/{
+# s/payloadbase64//g
+# r ${ENV_BUILD_CACHE}/payload.tgz.b64
+# }' ${ENV_BUILD_CACHE}/to_the_airgap.sh
+
+
