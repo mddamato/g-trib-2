@@ -67,6 +67,6 @@ compress-all: preflight-check
 # r ${ENV_BUILD_CACHE}/payload.tgz.b64
 # }' ${ENV_BUILD_CACHE}/to_the_airgap.sh
 
-	echo 'cat > payload.tar.b64 << EOF' >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
-	cat payload.tar | base64 -w0 >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
+	echo 'cat > payload.tgz.b64 << EOF' >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
+	cat ${ENV_BUILD_CACHE}/payload.tgz | base64 -w0 >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
 	echo 'EOF' >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
