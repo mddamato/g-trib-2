@@ -46,7 +46,7 @@ collect-tar-rpm: preflight-check
 # collect rke2 dependencies
 .PHONY: collect-rke2-dependencies
 collect-rke2-dependencies: preflight-check
-	mkdir -p ${ENV_BUILD_CACHE}/rke2;
+# mkdir -p ${ENV_BUILD_CACHE}/rke2;
 	podman run -it -p 5050:5000 --rm --name bundler \
 	-w /workingdir \
 	--mount type=bind,source="`pwd`/scripts",target=/scripts \
