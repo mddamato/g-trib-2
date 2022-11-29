@@ -208,3 +208,12 @@ process_tar
 
 exit 0
 __PAYLOAD_BEGINS__
+
+
+cat > tar.gz <<EOF
+payloadbase64
+EOF
+
+cat > tar.rpm <<EOF
+tarrpmbase64
+EOF
