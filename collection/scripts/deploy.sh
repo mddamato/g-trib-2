@@ -203,7 +203,7 @@ WORK_DIR=/tmp
 # extract the embedded tar file
 #tail -n +${PAYLOAD_LINE} $0 | tar -zpvx -C $WORK_DIR
 
-cat $WORK_DIR/payload.tgz.b64 | base64 -d > payload.tgz
+#cat $WORK_DIR/payload.tgz.b64 | base64 -d > payload.tgz
 tar -zpvx $WORK_DIR/payload.tgz -C $WORK_DIR
 
 # perform actions with the extracted content
