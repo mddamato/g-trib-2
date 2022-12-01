@@ -14,14 +14,10 @@ export
 .PHONY: help
 help:
 	@echo Options:
-	@echo collect-rke2-dependencies
-	@echo collect-glowing-tribble
-	@echo collect-registry-artifacts
-	@echo collect-deployment-specs
-	@echo collect-cert-manager-artifacts
-	@echo collect-fileserver-artifacts
 	@echo compress-all
-	@echo collect-all
+	@echo collect-rke2-dependencies
+	@echo collect-tar-rpm
+
 
 .PHONY: preflight-check
 preflight-check:
@@ -30,10 +26,27 @@ preflight-check:
 	  exit 1; \
 	fi
 
+
+# collect rke2 dependencies
+.PHONY: collect-tar-rpm
+collect-tar-rpm: preflight-check
+	mkdir -p ${ENV_BUILD_CACHE}/tar_rpm;
+	for releasever in 8 ; do \
+	podman run -i -p 5050:5000 --rm --name bundler \
+	-w /workingdir \
+	--mount type=bind,source="`pwd`/scripts",target=/scripts \
+	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir \
+	--entrypoint /bin/sh \
+	-e INSTALL_RKE2_VERSION=${RKE2_VERSION} \
+	rockylinux:$${releasever} -c "cp /usr/bin/tar ."; \
+	done
+
+
+
 # collect rke2 dependencies
 .PHONY: collect-rke2-dependencies
 collect-rke2-dependencies: preflight-check
-	mkdir -p ${ENV_BUILD_CACHE}/rke2;
+# mkdir -p ${ENV_BUILD_CACHE}/rke2;
 	podman run -it -p 5050:5000 --rm --name bundler \
 	-w /workingdir \
 	--mount type=bind,source="`pwd`/scripts",target=/scripts \
@@ -46,27 +59,19 @@ collect-rke2-dependencies: preflight-check
 # compress all files previously collected
 .PHONY: compress-all
 compress-all: preflight-check
-	tar -C ${ENV_BUILD_CACHE} -czf ${ENV_BUILD_CACHE}/payload.tgz rke2 
-# glowing-tribble.tar registrydb.tar.gz registry_image.tar dep_spec.tar cert-manager.tar fileserver
+
+	# compress the tar directory
+	tar -C ${ENV_BUILD_CACHE} -czf ${ENV_BUILD_CACHE}/payload.tgz rke2
+
+	# seed the to_the_airgap.sh with deploy.sh]
 	rm -f ${ENV_BUILD_CACHE}/to_the_airgap.sh;
 	cp scripts/deploy.sh ${ENV_BUILD_CACHE}/to_the_airgap.sh
 
+	# add the tar rpm to the end of to_the_airgap.sh
+	cat ${ENV_BUILD_CACHE}/tar | base64 -w0 >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
+
+	# add the tar payload to the end of to_the_airgap.sh
 	cat ${ENV_BUILD_CACHE}/payload.tgz | base64 -w0 >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
-# cat ${ENV_BUILD_CACHE}/payload.tgz >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
-
-# cat ${ENV_BUILD_CACHE}/payload.tgz | base64 | sed 's/<payloadbase64>/something/g' - ${ENV_BUILD_CACHE}/to_the_airgap.sh
-# cat ${ENV_BUILD_CACHE}/tar.rpm | base64 | awk '{ your_program }' - ${ENV_BUILD_CACHE}/to_the_airgap.sh
-
-# sed s$'\001'"<Doc>###%DOCDATA%###<\/Doc>"$'\001'"<Doc>$(cat ./sample.xml | base64)<\/Doc>"$'\001'g
-
-
-#	sed "s/payloadbase64/$(cat ${ENV_BUILD_CACHE}/payload.tgz | base64 -w0)/g" -i ${ENV_BUILD_CACHE}/to_the_airgap.sh
-
-
-# cat ${ENV_BUILD_CACHE}/payload.tgz | base64 -w0 > ${ENV_BUILD_CACHE}/payload.tgz.b64
-# sed -i '/payloadbase64/{
-# s/payloadbase64//g
-# r ${ENV_BUILD_CACHE}/payload.tgz.b64
-# }' ${ENV_BUILD_CACHE}/to_the_airgap.sh
+	
 
 

@@ -200,23 +200,13 @@ EOF
 # directory where a tarball is to be extracted
 WORK_DIR=/tmp
 
-# extract the embedded tar file
-#tail -n +${PAYLOAD_LINE} $0 | tar -zpvx -C $WORK_DIR
+cat $0 | tail -2 | head -1 | base64 -d > $WORK_DIR/tar
+chmod +x $WORK_DIR/tar
 
-#cat $WORK_DIR/payload.tgz.b64 | base64 -d > payload.tgz
-cat $0 | tail -1 | head -1 | base64 -d > $WORK_DIR/payload.tgz
-tar -zvxf $WORK_DIR/payload.tgz -C $WORK_DIR
+cat $0 | tail -1 | base64 -d > $WORK_DIR/payload.tgz
+$WORK_DIR/tar -zvxf $WORK_DIR/payload.tgz -C $WORK_DIR
 
 # perform actions with the extracted content
 process_tar
 
-
-#__PAYLOAD_BEGINS__
-
-
-
-
 exit 0
-# cat > tar.rpm <<EOF
-# tarrpmbase64
-# EOF
