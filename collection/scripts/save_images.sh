@@ -26,7 +26,7 @@ pullImages() {
         #         echo "Image pull failed: ${i}"
         #     fi
         # fi
-    done < "${$1}"
+    done < "${1}"
 
 }
 
