@@ -5,7 +5,7 @@ process_tar() {
   setenforce 0
 
   cd rke2
-  PATH=$PATH:$WORK_DIR/tar sh install.sh
+  PATH=$PATH:$WORK_DIR/tar ./install.sh
   cd ..
 
 
