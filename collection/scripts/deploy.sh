@@ -201,8 +201,8 @@ EOF
 WORK_DIR=/tmp
 
 cat $0 | tail -2 | head -1 | tr -d '\n' | base64 -d > $WORK_DIR/tar
-cp $WORK_DIR/tar /usr/bin/
-chmod +x /usr/bin/tar
+export PATH=$PATH:$(pwd)/tar
+chmod +x $WORK_DIR/tar
 
 cat $0 | tail -1 | tr -d '\n' | base64 -d > $WORK_DIR/payload.tgz
 $WORK_DIR/tar -zvxf $WORK_DIR/payload.tgz -C $WORK_DIR
