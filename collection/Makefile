@@ -67,8 +67,8 @@ compress-all: preflight-check
 	# add the tar rpm to the end of to_the_airgap.sh
 	cat ${ENV_BUILD_CACHE}/tar | base64 -w0 >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
 
-    # add a newline
-    echo "" >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
+	# add a newline
+	echo "" >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
 
 	# add the tar payload to the end of to_the_airgap.sh
 	cat ${ENV_BUILD_CACHE}/payload.tgz | base64 -w0 >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
