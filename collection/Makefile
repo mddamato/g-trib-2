@@ -54,9 +54,28 @@ collect-rke2-dependencies: preflight-check
 	rockylinux:8 /scripts/collect_rke2_dependencies.sh;
 
 
+# build registry database
+.PHONY: collect-registry-artifacts
+collect-registry-artifacts: preflight-check
+	mkdir -p ${ENV_BUILD_CACHE}/registry;
+	docker run -it -p 5050:5000 --rm --name bundler \
+	-v /var/run/docker.sock:/var/run/docker.sock \
+	-w /workingdir \
+	--mount type=bind,source="`pwd`/scripts",target=/scripts \
+	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir \
+	--mount type=bind,source="${ENV_BUILD_CACHE}/registrydb",target=/var/lib/registry \
+	--mount type=bind,source="`pwd`",target=/collection \
+	--entrypoint /bin/sh \
+	registry /scripts/collect_registry_artifacts.sh registry_images.txt;
+
+
 # compress all files previously collected
 .PHONY: compress-all
 compress-all: preflight-check
+	
+	rm -rf ${ENV_BUILD_CACHE}/manifests
+	mkdir -p ${ENV_BUILD_CACHE}/manifests
+	cp -R ${ENV_CONFIG_DIR}/manifests ${ENV_BUILD_CACHE}/manifests
 
 	# compress the tar directory
 	tar -C ${ENV_BUILD_CACHE} -czf ${ENV_BUILD_CACHE}/payload.tgz rke2
