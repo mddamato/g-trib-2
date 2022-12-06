@@ -74,7 +74,7 @@ collect-registry-artifacts: preflight-check
 	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/config \
 	--mount type=bind,source="`pwd`",target=/workingdir \
 	--entrypoint /bin/sh \
-	ubi8 scripts/save_images.sh registry_images.txt;
+	ubi8 scripts/save_images.sh /config/registry_images.txt;
 
 
 # compress all files previously collected
