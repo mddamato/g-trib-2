@@ -29,13 +29,14 @@ preflight-check:
 # collect rke2 dependencies
 .PHONY: collect-tar-rpm
 collect-tar-rpm: preflight-check
+	mkdir -p ${ENV_BUILD_CACHE}/bin
 	for releasever in 8 ; do \
 	podman run -i -p 5050:5000 --rm --name bundler \
 	-w /workingdir \
 	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir,z \
 	--entrypoint /bin/sh \
 	-e INSTALL_RKE2_VERSION=${RKE2_VERSION} \
-	rockylinux:$${releasever} -c "cp /usr/bin/tar ./.cache/"; \
+	rockylinux:$${releasever} -c "cp /usr/bin/tar ./.cache/bin"; \
 	done
 
 
@@ -65,7 +66,7 @@ compress-all: preflight-check
 	cp scripts/deploy.sh ${ENV_BUILD_CACHE}/to_the_airgap.sh
 
 	# add the tar rpm to the end of to_the_airgap.sh
-	cat ${ENV_BUILD_CACHE}/tar | base64 -w0 >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
+	cat ${ENV_BUILD_CACHE}/bin/tar | base64 -w0 >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
 
 	# add a newline
 	echo "" >> ${ENV_BUILD_CACHE}/to_the_airgap.sh

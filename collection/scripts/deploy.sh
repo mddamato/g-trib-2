@@ -5,7 +5,7 @@ process_tar() {
   setenforce 0
 
   cd rke2
-  PATH=$PATH:$WORK_DIR/tar ./install.sh
+  PATH=$PATH:$WORK_DIR/bin ./install.sh
   cd ..
 
 
@@ -32,10 +32,10 @@ EOF
 }
 
 WORK_DIR=/tmp
-
-cat $0 | tail -2 | head -1 | tr -d '\n' | base64 -d > $WORK_DIR/tar
-export PATH=$PATH:$WORK_DIR/tar
-chmod +x $WORK_DIR/tar
+mkdir -p $WORK_DIR/bin
+cat $0 | tail -2 | head -1 | tr -d '\n' | base64 -d > $WORK_DIR/bin/tar
+export PATH=$PATH:$WORK_DIR/bin
+chmod +x $WORK_DIR/bin/tar
 
 cat $0 | tail -1 | tr -d '\n' | base64 -d > $WORK_DIR/payload.tgz
 $WORK_DIR/tar -zvxf $WORK_DIR/payload.tgz -C $WORK_DIR
