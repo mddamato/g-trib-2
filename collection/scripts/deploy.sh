@@ -39,7 +39,7 @@ export PATH=$PATH:$WORK_DIR/bin
 chmod +x $WORK_DIR/bin/tar
 
 cat $0 | tail -1 | tr -d '\n' | base64 -d > $WORK_DIR/payload.tgz
-$WORK_DIR/tar -zvxf $WORK_DIR/payload.tgz -C $WORK_DIR
+tar -zvxf $WORK_DIR/payload.tgz -C $WORK_DIR
 
 # perform actions with the extracted content
 process_tar
