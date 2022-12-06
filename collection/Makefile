@@ -58,15 +58,23 @@ collect-rke2-dependencies: preflight-check
 .PHONY: collect-registry-artifacts
 collect-registry-artifacts: preflight-check
 	mkdir -p ${ENV_BUILD_CACHE}/registry;
-	docker run -it -p 5050:5000 --rm --name bundler \
-	-v /var/run/docker.sock:/var/run/docker.sock \
+	podman save docker.io/library/registry:2 -o ${ENV_BUILD_CACHE}/registry/registry.tar
+# docker run -it -p 5050:5000 --rm --name bundler \
+# -v /var/run/docker.sock:/var/run/docker.sock \
+# -w /workingdir \
+# --mount type=bind,source="`pwd`/scripts",target=/scripts \
+# --mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir \
+# --mount type=bind,source="${ENV_BUILD_CACHE}/registrydb",target=/var/lib/registry \
+# --mount type=bind,source="`pwd`",target=/collection \
+# --entrypoint /bin/sh \
+# registry /scripts/collect_registry_artifacts.sh registry_images.txt;
+
+	podman run -it -p 5050:5000 --rm --name bundler \
 	-w /workingdir \
-	--mount type=bind,source="`pwd`/scripts",target=/scripts \
-	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir \
-	--mount type=bind,source="${ENV_BUILD_CACHE}/registrydb",target=/var/lib/registry \
-	--mount type=bind,source="`pwd`",target=/collection \
+	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/config \
+	--mount type=bind,source="`pwd`",target=/workingdir \
 	--entrypoint /bin/sh \
-	registry /scripts/collect_registry_artifacts.sh registry_images.txt;
+	registry scripts/save_images.sh registry_images.txt;
 
 
 # compress all files previously collected
