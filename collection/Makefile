@@ -49,7 +49,7 @@ collect-rke2-dependencies: preflight-check
 	podman run -it -p 5050:5000 --rm --name bundler \
 	-w /workingdir \
 	--mount type=bind,source="`pwd`/scripts",target=/scripts \
-	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir,Z \
+	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir,z \
 	--entrypoint /bin/sh \
 	-e INSTALL_RKE2_VERSION=${RKE2_VERSION} \
 	rockylinux:8 /scripts/collect_rke2_dependencies.sh;
