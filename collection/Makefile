@@ -29,7 +29,6 @@ preflight-check:
 # collect rke2 dependencies
 .PHONY: collect-tar-rpm
 collect-tar-rpm: preflight-check
-	mkdir -p ${ENV_BUILD_CACHE}/tar_rpm;
 	for releasever in 8 ; do \
 	podman run -i -p 5050:5000 --rm --name bundler \
 	-w /workingdir \
@@ -66,7 +65,7 @@ compress-all: preflight-check
 	cp scripts/deploy.sh ${ENV_BUILD_CACHE}/to_the_airgap.sh
 
 	# add the tar rpm to the end of to_the_airgap.sh
-	cat ${ENV_BUILD_CACHE}/tar | base64 -w0 >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
+	cat ${ENV_BUILD_CACHE}/.cache/tar | base64 -w0 >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
 
 	# add the tar payload to the end of to_the_airgap.sh
 	cat ${ENV_BUILD_CACHE}/payload.tgz | base64 -w0 >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
