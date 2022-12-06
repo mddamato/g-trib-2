@@ -16,6 +16,7 @@ pullImages() {
     while IFS= read -r i; do
         [ -z "${i}" ] && continue
         echo "${i}"
+        skopeo sync --src docker --dest dir "${i}" /config/.cache/registry/db
         # if podman pull "${i}" > /dev/null 2>&1; then
         #     echo "Image pull success: ${i}"
         #     pulled="${pulled} ${i}"
@@ -30,7 +31,7 @@ pullImages() {
 
 }
 
-
+mkdir -p /config/.cache/registry/db
 for arg do
   printf '%s\n' "Arg $i: $arg"
   i=$((i + 1))
