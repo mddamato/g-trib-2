@@ -14,10 +14,9 @@ export
 .PHONY: help
 help:
 	@echo Options:
-	@echo compress-all
 	@echo collect-rke2-dependencies
 	@echo collect-tar-rpm
-
+	@echo compress-all
 
 .PHONY: preflight-check
 preflight-check:
@@ -50,7 +49,7 @@ collect-rke2-dependencies: preflight-check
 	podman run -it -p 5050:5000 --rm --name bundler \
 	-w /workingdir \
 	--mount type=bind,source="`pwd`/scripts",target=/scripts \
-	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir \
+	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir,Z \
 	--entrypoint /bin/sh \
 	-e INSTALL_RKE2_VERSION=${RKE2_VERSION} \
 	rockylinux:8 /scripts/collect_rke2_dependencies.sh;
