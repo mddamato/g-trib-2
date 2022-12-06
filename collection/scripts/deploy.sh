@@ -5,6 +5,7 @@ process_tar() {
   setenforce 0
 
   cd rke2
+  chmod +x install.sh
   PATH=$PATH:$WORK_DIR/bin ./install.sh
   cd ..
 
