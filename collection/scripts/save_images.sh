@@ -37,7 +37,7 @@ for arg do
   i=$((i + 1))
 
 
-  skopeo sync --all --src docker --dest dir $(sed ':a;N;$!ba;s/\n/ /g' config/my-env/registry_images.txt) /config/.cache/registry/db
+  skopeo sync --src docker --dest dir --all $(sed ':a;N;$!ba;s/\n/ /g' config/my-env/registry_images.txt) /config/.cache/registry/db
 
   #pullImages $arg
 
