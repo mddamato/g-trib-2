@@ -15,7 +15,7 @@ pullImages() {
     pulled=""
     while IFS= read -r i; do
         [ -z "${i}" ] && continue
-        echo ${i}
+        echo "${i}"
         # if podman pull "${i}" > /dev/null 2>&1; then
         #     echo "Image pull success: ${i}"
         #     pulled="${pulled} ${i}"
