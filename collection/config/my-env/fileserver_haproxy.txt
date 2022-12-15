@@ -1,1 +1,0 @@
-http://dl.rockylinux.org/pub/rocky/8/AppStream/x86_64/os/Packages/h/haproxy-1.8.27-4.el8.x86_64.rpm

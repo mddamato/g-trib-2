@@ -14,10 +14,9 @@ export
 .PHONY: help
 help:
 	@echo Options:
-	@echo compress-all
 	@echo collect-rke2-dependencies
 	@echo collect-tar-rpm
-
+	@echo compress-all
 
 .PHONY: preflight-check
 preflight-check:
@@ -30,15 +29,14 @@ preflight-check:
 # collect rke2 dependencies
 .PHONY: collect-tar-rpm
 collect-tar-rpm: preflight-check
-	mkdir -p ${ENV_BUILD_CACHE}/tar_rpm;
+	mkdir -p ${ENV_BUILD_CACHE}/bin
 	for releasever in 8 ; do \
 	podman run -i -p 5050:5000 --rm --name bundler \
 	-w /workingdir \
-	--mount type=bind,source="`pwd`/scripts",target=/scripts \
-	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir \
+	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir,z \
 	--entrypoint /bin/sh \
 	-e INSTALL_RKE2_VERSION=${RKE2_VERSION} \
-	rockylinux:$${releasever} -c "cp /usr/bin/tar ."; \
+	rockylinux:$${releasever} -c "cp /usr/bin/tar ./.cache/bin"; \
 	done
 
 
@@ -50,25 +48,55 @@ collect-rke2-dependencies: preflight-check
 	podman run -it -p 5050:5000 --rm --name bundler \
 	-w /workingdir \
 	--mount type=bind,source="`pwd`/scripts",target=/scripts \
-	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir \
+	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir,z \
 	--entrypoint /bin/sh \
 	-e INSTALL_RKE2_VERSION=${RKE2_VERSION} \
 	rockylinux:8 /scripts/collect_rke2_dependencies.sh;
 
 
+# build registry database
+.PHONY: collect-registry-artifacts
+collect-registry-artifacts: preflight-check
+	mkdir -p ${ENV_BUILD_CACHE}/registry;
+	podman save docker.io/library/registry:2 -o ${ENV_BUILD_CACHE}/registry/registry.tar
+# docker run -it -p 5050:5000 --rm --name bundler \
+# -v /var/run/docker.sock:/var/run/docker.sock \
+# -w /workingdir \
+# --mount type=bind,source="`pwd`/scripts",target=/scripts \
+# --mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir \
+# --mount type=bind,source="${ENV_BUILD_CACHE}/registrydb",target=/var/lib/registry \
+# --mount type=bind,source="`pwd`",target=/collection \
+# --entrypoint /bin/sh \
+# registry /scripts/collect_registry_artifacts.sh registry_images.txt;
+
+	podman run -it --rm --name bundler \
+	-w /workingdir \
+	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/config \
+	--mount type=bind,source="`pwd`",target=/workingdir \
+	--entrypoint /bin/sh \
+	ubi8 scripts/save_images.sh /config/registry_images.txt;
+
+
 # compress all files previously collected
 .PHONY: compress-all
 compress-all: preflight-check
+	
+	rm -rf ${ENV_BUILD_CACHE}/manifests
+	mkdir -p ${ENV_BUILD_CACHE}/manifests
+	cp -R ${ENV_CONFIG_DIR}/manifests ${ENV_BUILD_CACHE}/manifests
 
 	# compress the tar directory
-	tar -C ${ENV_BUILD_CACHE} -czf ${ENV_BUILD_CACHE}/payload.tgz rke2
+	tar -C ${ENV_BUILD_CACHE} -czf ${ENV_BUILD_CACHE}/payload.tgz rke2 manifests
 
 	# seed the to_the_airgap.sh with deploy.sh]
 	rm -f ${ENV_BUILD_CACHE}/to_the_airgap.sh;
 	cp scripts/deploy.sh ${ENV_BUILD_CACHE}/to_the_airgap.sh
 
 	# add the tar rpm to the end of to_the_airgap.sh
-	cat ${ENV_BUILD_CACHE}/tar | base64 -w0 >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
+	cat ${ENV_BUILD_CACHE}/bin/tar | base64 -w0 >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
+
+	# add a newline
+	echo "" >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
 
 	# add the tar payload to the end of to_the_airgap.sh
 	cat ${ENV_BUILD_CACHE}/payload.tgz | base64 -w0 >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
