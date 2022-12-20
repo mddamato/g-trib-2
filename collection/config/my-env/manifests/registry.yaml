@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    kubernetes.io/metadata.name: glowing-tribble
+  name: glowing-tribble
+status:
+  phase: Active
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: glowing-tribble
+  name: registry-insecure
+  labels:
+    app: registry-insecure
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: registry-insecure
+  template:
+    metadata:
+      labels:
+        app: registry-insecure
+    spec:
+      # volumes:
+      #   - name: registry-data
+      #     hostPath:
+      #       path: /var/lib/rancher/hostPaths/registrydb
+      #       type: Directory
+      containers:
+      - name: registry-insecure
+        env:
+        #image: docker.io/library/registry:2
+        image: docker.io/library/registry:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5000
+        # volumeMounts:
+        # - name: registry-data
+        #   mountPath: /var/lib/registry
+        #   readOnly: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: glowing-tribble
+  name: registry-insecure
+spec:
+  selector:
+    app: registry-insecure
+  type: NodePort
+  ports:
+    - port: 5000
+      targetPort: 5000
+      nodePort: 30000

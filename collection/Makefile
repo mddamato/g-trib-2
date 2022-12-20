@@ -93,8 +93,7 @@ collect-registry-artifacts: preflight-check
 compress-all: preflight-check
 	
 	rm -rf ${ENV_BUILD_CACHE}/manifests
-	mkdir -p ${ENV_BUILD_CACHE}/manifests
-	cp -R ${ENV_CONFIG_DIR}/manifests ${ENV_BUILD_CACHE}/manifests
+	cp -R ${ENV_CONFIG_DIR}/manifests ${ENV_BUILD_CACHE}/
 
 	# compress the tar directory
 	tar -C ${ENV_BUILD_CACHE} -cf ${ENV_BUILD_CACHE}/payload.tar rke2 manifests registry
