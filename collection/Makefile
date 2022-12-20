@@ -58,6 +58,7 @@ collect-rke2-dependencies: preflight-check
 .PHONY: collect-registry-artifacts
 collect-registry-artifacts: preflight-check
 	mkdir -p ${ENV_BUILD_CACHE}/registry;
+	podman pull docker.io/library/registry:2
 	podman save docker.io/library/registry:2 -o ${ENV_BUILD_CACHE}/registry/registry.tar
 # docker run -it -p 5050:5000 --rm --name bundler \
 # -v /var/run/docker.sock:/var/run/docker.sock \
