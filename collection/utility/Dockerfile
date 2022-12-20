@@ -1,4 +1,4 @@
-FROM redhat/ubi8:latest
+FROM docker.io/redhat/ubi8:latest
 
 WORKDIR /var/lib/utility
 

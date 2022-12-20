@@ -30,7 +30,6 @@ preflight-check:
 # collect rke2 dependencies
 .PHONY: collect-utility
 collect-utility: preflight-check
-	alias podman=docker
 	podman build -f `pwd`/utility/Dockerfile $(pwd)/../ -t utility
 	
 
