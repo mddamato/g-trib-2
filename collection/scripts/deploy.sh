@@ -12,7 +12,7 @@ process_tar() {
 
 
 
-  echo "Starting RKE2 Server Serivce.  This will take a few minutes."
+  echo "Starting RKE2 Server service.  This will take a few minutes."
   systemctl start rke2-server
 
   #Configure kubectl
@@ -29,7 +29,7 @@ EOF
 
 }
 
-if [ "$(id -u)" -ne 0 ] ; then echo "must be run as root."; exit 1 ; fi
+if [ "$(id -u)" -ne 0 ] ; then echo "Must be run as root. Exiting."; printf '\xE2\x98\xA0'; exit 1 ; fi
 
 WORK_DIR=/tmp
 mkdir -p $WORK_DIR/bin
@@ -40,8 +40,11 @@ chmod +x $WORK_DIR/bin/tar
 cat $0 | tail -1 | tr -d '\n' | base64 -d > $WORK_DIR/payload.tgz
 tar -zvxf $WORK_DIR/payload.tgz -C $WORK_DIR
 
-cp $WORK_DIR/manifests/* /var/lib/rancher/rke2/server/manifests/
+mkdir -p /var/lib/rancher/rke2/server/manifests/
+mkdir -p /var/lib/rancher/rke2/agent/images/
+cp $WORK_DIR/manifests/*.yaml /var/lib/rancher/rke2/server/manifests/
 cp $WORK_DIR/regtistry/*.tar /var/lib/rancher/rke2/agent/images/
+
 # perform actions with the extracted content
 process_tar
 
