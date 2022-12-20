@@ -38,7 +38,21 @@ for arg do
 
 
   #skopeo sync --src docker --dest dir --all $(sed ':a;N;$!ba;s/\n/ /g' config/my-env/registry_images.txt) /config/.cache/registry/db
-
+    while IFS= read -r i; do
+        [ -z "${i}" ] && continue
+        echo "${i}"
+        # skopeo sync --src docker --dest dir "${i}" /config/.cache/registry/db
+        # if podman pull "${i}" > /dev/null 2>&1; then
+        #     echo "Image pull success: ${i}"
+        #     pulled="${pulled} ${i}"
+        # else
+        #     if podman inspect "${i}" > /dev/null 2>&1; then
+        #         pulled="${pulled} ${i}"		
+        #     else
+        #         echo "Image pull failed: ${i}"
+        #     fi
+        # fi
+    done < "${arg}"
 
   #pullImages $arg
 
