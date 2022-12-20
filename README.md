@@ -3,14 +3,17 @@
 ## Overall Stages
 
 Requirements:
-- alias docker=podman
 - yum install -y make git podman
+- alias docker=podman
+- 
 - sysctl user.max_user_namespaces=15000
 - git clone https://github.com/mddamato/g-trib-2.git /opt/g-trib-2
 - cd /opt/g-trib-2/collection
 
 Example command:
 - make collect-rke2-dependencies ENVIRONMENT=my-env
+
+
 Dependencies to collect:
 - RKE2 single node airgap script tar file
 - registry image tar file

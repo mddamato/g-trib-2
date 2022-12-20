@@ -26,6 +26,15 @@ preflight-check:
 	fi
 
 
+
+# collect rke2 dependencies
+.PHONY: collect-utility
+collect-utility: preflight-check
+	podman build -f `pwd`/utility/Dockerfile $(pwd)/../ -t utility
+	
+
+
+
 # collect rke2 dependencies
 .PHONY: collect-tar-rpm
 collect-tar-rpm: preflight-check
@@ -57,7 +66,9 @@ collect-rke2-dependencies: preflight-check
 # build registry database
 .PHONY: collect-registry-artifacts
 collect-registry-artifacts: preflight-check
-	mkdir -p ${ENV_BUILD_CACHE}/registry;
+	mkdir -p ${ENV_BUILD_CACHE}/registry;\
+	rm -f ${ENV_BUILD_CACHE}/registry/registry.tar
+	podman pull docker.io/library/registry:2
 	podman save docker.io/library/registry:2 -o ${ENV_BUILD_CACHE}/registry/registry.tar
 # docker run -it -p 5050:5000 --rm --name bundler \
 # -v /var/run/docker.sock:/var/run/docker.sock \
@@ -82,11 +93,11 @@ collect-registry-artifacts: preflight-check
 compress-all: preflight-check
 	
 	rm -rf ${ENV_BUILD_CACHE}/manifests
-	mkdir -p ${ENV_BUILD_CACHE}/manifests
-	cp -R ${ENV_CONFIG_DIR}/manifests ${ENV_BUILD_CACHE}/manifests
+	cp -R ${ENV_CONFIG_DIR}/manifests ${ENV_BUILD_CACHE}/
 
 	# compress the tar directory
-	tar -C ${ENV_BUILD_CACHE} -czf ${ENV_BUILD_CACHE}/payload.tgz rke2 manifests
+	tar -C ${ENV_BUILD_CACHE} -cf ${ENV_BUILD_CACHE}/payload.tar rke2 manifests registry
+	pigz ${ENV_BUILD_CACHE}/payload.tar
 
 	# seed the to_the_airgap.sh with deploy.sh]
 	rm -f ${ENV_BUILD_CACHE}/to_the_airgap.sh;
@@ -99,7 +110,7 @@ compress-all: preflight-check
 	echo "" >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
 
 	# add the tar payload to the end of to_the_airgap.sh
-	cat ${ENV_BUILD_CACHE}/payload.tgz | base64 -w0 >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
+	cat ${ENV_BUILD_CACHE}/payload.tar.gz | base64 -w0 >> ${ENV_BUILD_CACHE}/to_the_airgap.sh
 	
 
 

@@ -10,12 +10,9 @@ process_tar() {
   cd ..
 
 
-  cat > /etc/rancher/rke2/config.yaml << EOF
-disable:
-  - rke2-ingress-nginx
-EOF
 
-  echo "Starting RKE2 Server Serivce.  This will take a few minutes."
+
+  echo "Starting RKE2 Server service.  This will take a few minutes."
   systemctl start rke2-server
 
   #Configure kubectl
@@ -32,6 +29,8 @@ EOF
 
 }
 
+if [ "$(id -u)" -ne 0 ] ; then printf '\xE2\x98\xA0'; echo "Must be run as root. Exiting.";  exit 1 ; fi
+
 WORK_DIR=/tmp
 mkdir -p $WORK_DIR/bin
 cat $0 | tail -2 | head -1 | tr -d '\n' | base64 -d > $WORK_DIR/bin/tar
@@ -41,7 +40,14 @@ chmod +x $WORK_DIR/bin/tar
 cat $0 | tail -1 | tr -d '\n' | base64 -d > $WORK_DIR/payload.tgz
 tar -zvxf $WORK_DIR/payload.tgz -C $WORK_DIR
 
+mkdir -p /var/lib/rancher/rke2/server/manifests/
+mkdir -p /var/lib/rancher/rke2/agent/images/
+cp $WORK_DIR/manifests/*.yaml /var/lib/rancher/rke2/server/manifests/
+cp $WORK_DIR/registry/*.tar /var/lib/rancher/rke2/agent/images/
+
 # perform actions with the extracted content
 process_tar
+
+
 
 exit 0
