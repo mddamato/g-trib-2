@@ -9,51 +9,40 @@ yum install -y podman curl git pigz tar && \
     rm -f helm-v3.8.2-linux-amd64.tar.gz && \
     rm -rf linux-amd64
 
-pullImages() {
+# pullImages() {
 
 
-    pulled=""
-    while IFS= read -r i; do
-        [ -z "${i}" ] && continue
-        echo "${i}"
-        # skopeo sync --src docker --dest dir "${i}" /config/.cache/registry/db
-        # if podman pull "${i}" > /dev/null 2>&1; then
-        #     echo "Image pull success: ${i}"
-        #     pulled="${pulled} ${i}"
-        # else
-        #     if podman inspect "${i}" > /dev/null 2>&1; then
-        #         pulled="${pulled} ${i}"		
-        #     else
-        #         echo "Image pull failed: ${i}"
-        #     fi
-        # fi
-    done < "${1}"
+#     pulled=""
+#     while IFS= read -r i; do
+#         [ -z "${i}" ] && continue
+#         echo "${i}"
+#         # skopeo sync --src docker --dest dir "${i}" /config/.cache/registry/db
+#         # if podman pull "${i}" > /dev/null 2>&1; then
+#         #     echo "Image pull success: ${i}"
+#         #     pulled="${pulled} ${i}"
+#         # else
+#         #     if podman inspect "${i}" > /dev/null 2>&1; then
+#         #         pulled="${pulled} ${i}"		
+#         #     else
+#         #         echo "Image pull failed: ${i}"
+#         #     fi
+#         # fi
+#     done < "${1}"
 
-}
+# }
 
 mkdir -p /config/.cache/registry/db
 for arg do
   printf '%s\n' "Arg $i: $arg"
   i=$((i + 1))
 
-
-  #skopeo sync --src docker --dest dir --all $(sed ':a;N;$!ba;s/\n/ /g' config/my-env/registry_images.txt) /config/.cache/registry/db
     while IFS= read -r i; do
         [ -z "${i}" ] && continue
-        echo "${i}"
-        # skopeo sync --src docker --dest dir "${i}" /config/.cache/registry/db
-        # if podman pull "${i}" > /dev/null 2>&1; then
-        #     echo "Image pull success: ${i}"
-        #     pulled="${pulled} ${i}"
-        # else
-        #     if podman inspect "${i}" > /dev/null 2>&1; then
-        #         pulled="${pulled} ${i}"		
-        #     else
-        #         echo "Image pull failed: ${i}"
-        #     fi
-        # fi
-    done < "${arg}"
 
-  #pullImages $arg
+        podman pull "${i}"
+        podman save "${i}" --format oci-dir --compress -o /config/.cache/registry/db
+        echo "${i}"
+
+    done < "${arg}"
 
 done
