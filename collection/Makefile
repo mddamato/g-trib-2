@@ -88,7 +88,7 @@ compress-all: preflight-check
 	cp -R ${ENV_CONFIG_DIR}/manifests ${ENV_BUILD_CACHE}/manifests
 
 	# compress the tar directory
-	tar -C ${ENV_BUILD_CACHE} -czf ${ENV_BUILD_CACHE}/payload.tgz rke2 manifests
+	tar -C ${ENV_BUILD_CACHE} -czf ${ENV_BUILD_CACHE}/payload.tgz rke2 manifests registry
 
 	# seed the to_the_airgap.sh with deploy.sh]
 	rm -f ${ENV_BUILD_CACHE}/to_the_airgap.sh;
