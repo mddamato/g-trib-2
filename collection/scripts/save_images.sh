@@ -2,7 +2,7 @@
 
 
 set -ex
-yum install -y skopeo curl git pigz tar && \
+yum install -y podman curl git pigz tar && \
     curl -LO https://get.helm.sh/helm-v3.8.2-linux-amd64.tar.gz && \
     tar -zxvf helm-v3.8.2-linux-amd64.tar.gz && \
     mv linux-amd64/helm /usr/local/bin/helm && \
@@ -37,7 +37,8 @@ for arg do
   i=$((i + 1))
 
 
-  skopeo sync --src docker --dest dir --all $(sed ':a;N;$!ba;s/\n/ /g' config/my-env/registry_images.txt) /config/.cache/registry/db
+  #skopeo sync --src docker --dest dir --all $(sed ':a;N;$!ba;s/\n/ /g' config/my-env/registry_images.txt) /config/.cache/registry/db
+
 
   #pullImages $arg
 
