@@ -40,7 +40,7 @@ for arg do
         [ -z "${i}" ] && continue
 
         podman pull "${i}"
-        podman save "${i}" --format oci-dir --compress -o /config/.cache/registry/db
+        podman save "${i}" --format docker-dir -o /config/.cache/registry/db
         echo "${i}"
 
     done < "${arg}"

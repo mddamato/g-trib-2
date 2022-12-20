@@ -24,23 +24,23 @@ spec:
       labels:
         app: registry-insecure
     spec:
-      # volumes:
-      #   - name: registry-data
-      #     hostPath:
-      #       path: /var/lib/rancher/hostPaths/registrydb
-      #       type: Directory
+      volumes:
+        - name: registry-data
+          hostPath:
+            path: /tmp/registry/db/
+            type: Directory
       containers:
       - name: registry-insecure
         env:
         #image: docker.io/library/registry:2
-        image: docker.io/library/registry:latest
+        image: docker.io/library/registry:2
         imagePullPolicy: Never
         ports:
         - containerPort: 5000
-        # volumeMounts:
-        # - name: registry-data
-        #   mountPath: /var/lib/registry
-        #   readOnly: true
+        volumeMounts:
+        - name: registry-data
+          mountPath: /var/lib/registry
+          readOnly: true
 ---
 apiVersion: v1
 kind: Service
