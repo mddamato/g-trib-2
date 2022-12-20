@@ -70,12 +70,12 @@ collect-registry-artifacts: preflight-check
 # --entrypoint /bin/sh \
 # registry /scripts/collect_registry_artifacts.sh registry_images.txt;
 
-	podman run -it --rm --name bundler \
-	-w /workingdir \
-	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/config \
-	--mount type=bind,source="`pwd`",target=/workingdir \
-	--entrypoint /bin/sh \
-	ubi8 scripts/save_images.sh /config/registry_images.txt;
+	# podman run -it --rm --name bundler \
+	# -w /workingdir \
+	# --mount type=bind,source="${ENV_CONFIG_DIR}",target=/config \
+	# --mount type=bind,source="`pwd`",target=/workingdir \
+	# --entrypoint /bin/sh \
+	# ubi8 scripts/save_images.sh /config/registry_images.txt;
 
 
 # compress all files previously collected
