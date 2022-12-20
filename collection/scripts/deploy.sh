@@ -29,7 +29,7 @@ EOF
 
 }
 
-if [ "$(id -u)" -ne 0 ] ; then echo "Must be run as root. Exiting."; printf '\xE2\x98\xA0'; exit 1 ; fi
+if [ "$(id -u)" -ne 0 ] ; then printf '\xE2\x98\xA0'; echo "Must be run as root. Exiting.";  exit 1 ; fi
 
 WORK_DIR=/tmp
 mkdir -p $WORK_DIR/bin
@@ -43,7 +43,7 @@ tar -zvxf $WORK_DIR/payload.tgz -C $WORK_DIR
 mkdir -p /var/lib/rancher/rke2/server/manifests/
 mkdir -p /var/lib/rancher/rke2/agent/images/
 cp $WORK_DIR/manifests/*.yaml /var/lib/rancher/rke2/server/manifests/
-cp $WORK_DIR/regtistry/*.tar /var/lib/rancher/rke2/agent/images/
+cp $WORK_DIR/registry/*.tar /var/lib/rancher/rke2/agent/images/
 
 # perform actions with the extracted content
 process_tar
