@@ -1,0 +1,72 @@
+docker.io:
+  images:
+    httpd:
+    - 2.4.54
+    rancher/fleet:
+    - v0.4.0
+    rancher/fleet-agent:
+    - v0.4.0
+    rancher/gitjob:
+    - v0.1.32
+    rancher/hardened-calico:
+    - v3.20.3-build20220114
+    rancher/hardened-cluster-autoscaler:
+    - v1.8.5-build20211119
+    rancher/hardened-coredns:
+    - v1.8.5-build20211119
+    rancher/hardened-dns-node-cache:
+    - 1.21.2-build20211119
+    rancher/hardened-etcd:
+    - v3.4.18-k3s1-build20220118
+    rancher/hardened-flannel:
+    - v0.15.1-build20211119
+    rancher/hardened-k8s-metrics-server:
+    - v0.5.0-build20211119
+    rancher/hardened-kubernetes:
+    - v1.21.9-rke2r1-build20220119
+    rancher/klipper-helm:
+    - v0.6.8-build20211123
+    rancher/kubectl:
+    - v1.23.7
+    rancher/machine:
+    - v0.15.0-rancher95
+    rancher/mirrored-ingress-nginx-kube-webhook-certgen:
+    - v1.0
+    rancher/mirrored-library-traefik:
+    - 2.6.2
+    rancher/nginx-ingress-controller:
+    - nginx-1.0.2-hardened2
+    rancher/pause:
+    - '3.6'
+    rancher/rancher:
+    - v2.6.9
+    rancher/rancher-agent:
+    - v2.6.9
+    rancher/rancher-webhook:
+    - v0.2.7
+    rancher/rke2-cloud-provider:
+    - v0.0.3-build20211118
+    rancher/rke2-runtime:
+    - v1.21.9-rke2r1
+    rancher/shell:
+    - v0.1.18
+    rancher/system-agent:
+    - v0.2.13-suc
+    rancher/system-agent-installer-rke2:
+    - v1.21.9-rke2r1
+    rancher/system-upgrade-controller:
+    - v0.9.1
+quay.io:
+  images:
+    jetstack/cert-manager-cainjector:
+    - v1.7.1
+    jetstack/cert-manager-controller:
+    - v1.7.1
+    jetstack/cert-manager-ctl:
+    - v1.7.1
+    jetstack/cert-manager-webhook:
+    - v1.7.1
+    metallb/controller:
+    - v0.10.3
+    metallb/speaker:
+    - v0.10.3

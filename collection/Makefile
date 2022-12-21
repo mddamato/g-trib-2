@@ -68,24 +68,13 @@ collect-rke2-dependencies: preflight-check
 collect-registry-artifacts: preflight-check
 	mkdir -p ${ENV_BUILD_CACHE}/registry;\
 	rm -f ${ENV_BUILD_CACHE}/registry/registry.tar
-	podman pull docker.io/library/registry:2
-	podman save docker.io/library/registry:2 -o ${ENV_BUILD_CACHE}/registry/registry.tar
-# docker run -it -p 5050:5000 --rm --name bundler \
-# -v /var/run/docker.sock:/var/run/docker.sock \
-# -w /workingdir \
-# --mount type=bind,source="`pwd`/scripts",target=/scripts \
-# --mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir \
-# --mount type=bind,source="${ENV_BUILD_CACHE}/registrydb",target=/var/lib/registry \
-# --mount type=bind,source="`pwd`",target=/collection \
-# --entrypoint /bin/sh \
-# registry /scripts/collect_registry_artifacts.sh registry_images.txt;
-
+	#podman pull docker.io/library/registry:2
 	podman run -it --rm --name bundler \
 	-w /workingdir \
 	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/config \
 	--mount type=bind,source="`pwd`",target=/workingdir \
 	--entrypoint /bin/sh \
-	ubi8 scripts/save_images.sh /config/registry_images.txt;
+        docker.io/ananace/skopeo skopeo sync --src yaml --dest local /config/registry_images.yml /config/.cache/registry.tar;
 
 
 # compress all files previously collected
