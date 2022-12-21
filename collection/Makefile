@@ -69,13 +69,7 @@ collect-registry-artifacts: preflight-check
 	mkdir -p ${ENV_BUILD_CACHE}/registry;\
 	rm -f ${ENV_BUILD_CACHE}/registry/registry.tar
 	#podman pull docker.io/library/registry:2
-	podman run -it --rm --name bundler \
-	-w /workingdir \
-	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/config \
-	--mount type=bind,source="`pwd`",target=/workingdir \
-	--entrypoint /bin/sh \
-        docker.io/ananace/skopeo skopeo sync --src yaml --dest local /config/registry_images.yml /config/.cache/registry.tar;
-
+	skopeo sync --src yaml --dest dir ${ENV_CONFIG_DIR}/registry_images.yml ${ENV_BUILD_CACHE}/registry.tar
 
 # compress all files previously collected
 .PHONY: compress-all
