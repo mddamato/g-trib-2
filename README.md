@@ -3,9 +3,7 @@
 ## Overall Stages
 
 Requirements:
-- yum install -y make git podman
-- alias docker=podman
-- 
+- yum install -y make git podman skopeo
 - sysctl user.max_user_namespaces=15000
 - git clone https://github.com/mddamato/g-trib-2.git /opt/g-trib-2
 - cd /opt/g-trib-2/collection
