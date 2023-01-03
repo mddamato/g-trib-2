@@ -56,19 +56,25 @@ collect-tar-rpm: preflight-check
 	done
 
 # collect rke2 dependencies
-.PHONY: collect-utility
+.PHONY: collect-images
 collect-utility: preflight-check
 	podman build -f `pwd`/utility/Dockerfile $(pwd)/../ -t utility:latest
 	podman save utility -o ${ENV_BUILD_CACHE}/registry/utility.tar
+
+	rm -f ${ENV_BUILD_CACHE}/registry/registry.tar
+	podman pull registry1.dso.mil/ironbank/opensource/docker/registry-v2:latest
+	podman save registry1.dso.mil/ironbank/opensource/docker/registry-v2:latest -o ${ENV_BUILD_CACHE}/registry/registry.tar
+
+	rm -f ${ENV_BUILD_CACHE}/registry/skopeo.tar
+	podman pull registry1.dso.mil/ironbank/opensource/containers/skopeo:latest
+	podman save registry1.dso.mil/ironbank/opensource/containers/skopeo:latest -o ${ENV_BUILD_CACHE}/registry/skopeo.tar
+
 
 # build registry database
 .PHONY: collect-registry-artifacts
 collect-registry-artifacts: preflight-check
 	mkdir -p ${ENV_BUILD_CACHE}/registry;\
-	rm -f ${ENV_BUILD_CACHE}/registry/registry.tar
 	rm -rf ${ENV_BUILD_CACHE}/registry/db
-	podman pull docker.io/library/registry:2
-	podman save docker.io/library/registry:2 -o ${ENV_BUILD_CACHE}/registry/registry.tar
 	podman run -it --rm --name bundler -w /workingdir \
 	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/config,z \
 	--mount type=bind,source="`pwd`",target=/workingdir,z \

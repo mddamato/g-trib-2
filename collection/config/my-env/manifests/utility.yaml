@@ -18,5 +18,5 @@ spec:
     spec:
       containers:
       - name: utility
-        image: utility:latest
+        image: localhost/utility:latest
         imagePullPolicy: Never
