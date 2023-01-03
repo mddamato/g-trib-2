@@ -28,3 +28,7 @@ docker.io:
           - v3.20.3-build20220114
         rancher/hardened-flannel:
           - v0.15.1-build20211119
+
+registry1.dso.mil:
+  ironbank/opensource/containers/skopeo:
+    - latest

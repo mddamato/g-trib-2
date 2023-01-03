@@ -25,6 +25,7 @@ RUN yum makecache --timer \
   python3-devel \
   gcc \
   git \
+  unzip \
   yum-utils \
   make \
   python38 \
@@ -45,6 +46,10 @@ RUN pip-3.8 install --upgrade pip && \
 
 RUN curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
-ADD . .
+RUN curl -LO https://github.com/mddamato/g-trib-2/archive/refs/heads/main.zip && \
+    unzip main.zip && \
+    cp -R g-trib-2-main/* . && \
+    rm -rf g-trib-2-main && \
+    rm -f main.zip
 
 ENTRYPOINT ["/bin/bash", "-c"]

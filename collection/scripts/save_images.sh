@@ -2,7 +2,7 @@
 
 
 set -ex
-yum install -y podman curl git pigz tar && \
+yum install -y skopeo curl git pigz tar && \
     curl -LO https://get.helm.sh/helm-v3.8.2-linux-amd64.tar.gz && \
     tar -zxvf helm-v3.8.2-linux-amd64.tar.gz && \
     mv linux-amd64/helm /usr/local/bin/helm && \
@@ -32,17 +32,19 @@ yum install -y podman curl git pigz tar && \
 # }
 
 mkdir -p /config/.cache/registry/db
-for arg do
-  printf '%s\n' "Arg $i: $arg"
-  i=$((i + 1))
+skopeo sync --keep-going --src yaml --dest dir /config/registry_images.yml /config/.cache/registry/db
 
-    while IFS= read -r i; do
-        [ -z "${i}" ] && continue
+# for arg do
+#   printf '%s\n' "Arg $i: $arg"
+#   i=$((i + 1))
 
-        podman pull "${i}"
-        podman save "${i}" --format docker-dir -o /config/.cache/registry/db
-        echo "${i}"
+#     while IFS= read -r i; do
+#         [ -z "${i}" ] && continue
 
-    done < "${arg}"
+#         podman pull "${i}"
+#         podman save "${i}" --format docker-dir -o /config/.cache/registry/db
+#         echo "${i}"
 
-done
+#     done < "${arg}"
+
+# done

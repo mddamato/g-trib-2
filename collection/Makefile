@@ -17,6 +17,9 @@ help:
 	@echo collect-rke2-dependencies
 	@echo collect-tar-rpm
 	@echo compress-all
+	@echo collect-utility
+	@echo collect-registry-artifacts
+	@echo compress-all
 
 .PHONY: preflight-check
 preflight-check:
@@ -25,13 +28,17 @@ preflight-check:
 	  exit 1; \
 	fi
 
-
-
 # collect rke2 dependencies
-.PHONY: collect-utility
-collect-utility: preflight-check
-	podman build -f `pwd`/utility/Dockerfile $(pwd)/../ -t utility
-	
+.PHONY: collect-rke2-dependencies
+collect-rke2-dependencies: preflight-check
+# mkdir -p ${ENV_BUILD_CACHE}/rke2;
+	podman run -it -p 5050:5000 --rm --name bundler \
+	-w /workingdir \
+	--mount type=bind,source="`pwd`/scripts",target=/scripts \
+	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir,z \
+	--entrypoint /bin/sh \
+	-e INSTALL_RKE2_VERSION=${RKE2_VERSION} \
+	rockylinux:8 /scripts/collect_rke2_dependencies.sh;
 
 
 
@@ -48,28 +55,24 @@ collect-tar-rpm: preflight-check
 	rockylinux:$${releasever} -c "cp /usr/bin/tar ./.cache/bin"; \
 	done
 
-
-
 # collect rke2 dependencies
-.PHONY: collect-rke2-dependencies
-collect-rke2-dependencies: preflight-check
-# mkdir -p ${ENV_BUILD_CACHE}/rke2;
-	podman run -it -p 5050:5000 --rm --name bundler \
-	-w /workingdir \
-	--mount type=bind,source="`pwd`/scripts",target=/scripts \
-	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir,z \
-	--entrypoint /bin/sh \
-	-e INSTALL_RKE2_VERSION=${RKE2_VERSION} \
-	rockylinux:8 /scripts/collect_rke2_dependencies.sh;
-
+.PHONY: collect-utility
+collect-utility: preflight-check
+	podman build -f `pwd`/utility/Dockerfile $(pwd)/../ -t utility:latest
+	podman save utility -o ${ENV_BUILD_CACHE}/registry/utility.tar
 
 # build registry database
 .PHONY: collect-registry-artifacts
 collect-registry-artifacts: preflight-check
 	mkdir -p ${ENV_BUILD_CACHE}/registry;\
 	rm -f ${ENV_BUILD_CACHE}/registry/registry.tar
-	#podman pull docker.io/library/registry:2
-	skopeo sync --src yaml --dest dir ${ENV_CONFIG_DIR}/registry_images.yml ${ENV_BUILD_CACHE}/registry.tar
+	rm -rf ${ENV_BUILD_CACHE}/registry/db
+	podman pull docker.io/library/registry:2
+	podman save docker.io/library/registry:2 -o ${ENV_BUILD_CACHE}/registry/registry.tar
+	podman run -it --rm --name bundler -w /workingdir \
+	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/config,z \
+	--mount type=bind,source="`pwd`",target=/workingdir,z \
+	--entrypoint /bin/sh ubi8 scripts/save_images.sh
 
 # compress all files previously collected
 .PHONY: compress-all
