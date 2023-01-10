@@ -17,7 +17,7 @@ help:
 	@echo collect-rke2-dependencies
 	@echo collect-tar-rpm
 	@echo collect-images
-	@echo collect-registry-artifacts
+	@echo hoppr
 	@echo compress-all
 
 .PHONY: preflight-check
@@ -35,7 +35,7 @@ collect-rke2-dependencies: preflight-check
 # mkdir -p ${ENV_BUILD_CACHE}/rke2;
 	podman run -it -p 5050:5000 --rm --name bundler \
 	-w /workingdir \
-	--mount type=bind,source="`pwd`/scripts",target=/scripts \
+	--mount type=bind,source="`pwd`/scripts",target=/scripts,z \
 	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir,z \
 	--entrypoint /bin/sh \
 	-e INSTALL_RKE2_VERSION=${RKE2_VERSION} \
@@ -47,9 +47,8 @@ hoppr: preflight-check
 	podman run \
 	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/opt/app,z \
 	--mount type=bind,source="${ENV_BUILD_CACHE}",target=/output,z \
-	-e REG1_USERNAME="${REG1_USERNAME}" \
-	-e REG1_PASSWORD="${REG1_PASSWORD}" \
-	hoppr/hopctl bundle hoppr/manifest.yaml --transfer hoppr/transfer.yaml --credentials hoppr/credentials.yaml
+	--mount type=bind,source="/run/containers/0/auth.json",target=/run/containers/0/auth.json,z \
+	hoppr/hopctl bundle hoppr/manifest.yaml --transfer hoppr/transfer.yaml
 
 # collect rke2 dependencies
 .PHONY: collect-tar-rpm
@@ -83,14 +82,14 @@ collect-images: preflight-check
 
 
 # build registry database
-.PHONY: collect-registry-artifacts
-collect-registry-artifacts: preflight-check
-	mkdir -p ${ENV_BUILD_CACHE}/registry;\
-	rm -rf ${ENV_BUILD_CACHE}/registry/db
-	podman run -it --rm --name bundler -w /workingdir \
-	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/config,z \
-	--mount type=bind,source="`pwd`",target=/workingdir,z \
-	--entrypoint /bin/sh ubi8 scripts/save_images.sh
+# .PHONY: collect-registry-artifacts
+# collect-registry-artifacts: preflight-check
+# 	mkdir -p ${ENV_BUILD_CACHE}/registry;\
+# 	rm -rf ${ENV_BUILD_CACHE}/registry/db
+# 	podman run -it --rm --name bundler -w /workingdir \
+# 	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/config,z \
+# 	--mount type=bind,source="`pwd`",target=/workingdir,z \
+# 	--entrypoint /bin/sh ubi8 scripts/save_images.sh
 
 # compress all files previously collected
 .PHONY: compress-all
@@ -101,7 +100,7 @@ compress-all: preflight-check
 	cp -R ${ENV_CONFIG_DIR}/rke2_configuration.yaml ${ENV_BUILD_CACHE}/rke2_configuration.yaml
 
 	# compress the tar directory
-	tar -C ${ENV_BUILD_CACHE} -cf ${ENV_BUILD_CACHE}/payload.tar rke2 manifests registry rke2_configuration.yaml
+	tar -C ${ENV_BUILD_CACHE} -cf ${ENV_BUILD_CACHE}/payload.tar rke2 manifests hoppr.tar rke2_configuration.yaml
 	pigz ${ENV_BUILD_CACHE}/payload.tar
 
 	# seed the to_the_airgap.sh with deploy.sh]

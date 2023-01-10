@@ -18,8 +18,8 @@
 
         {
             "type": "library",
-            "name": "hello-world",
-            "version": "latest",
+            "name": "skopeo",
+            "version": "v2.6.9",
             "purl": "pkg:docker/rancher/rancher@v2.6.9"
         },
 
@@ -87,12 +87,6 @@
             "name": "skopeo",
             "version": "3.6",
             "purl": "pkg:docker/rancher/pause@3.6"
-        },
-        {
-            "type": "library",
-            "name": "skopeo",
-            "version": "v1.0",
-            "purl": "pkg:docker/rancher/pause@v1.0"
         },
         {
             "type": "library",
