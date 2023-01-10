@@ -1,0 +1,4 @@
+
+
+kubelet-arg:
+- image-gc-high-threshold=100

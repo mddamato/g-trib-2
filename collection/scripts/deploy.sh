@@ -44,6 +44,7 @@ mkdir -p /var/lib/rancher/rke2/server/manifests/
 mkdir -p /var/lib/rancher/rke2/agent/images/
 cp $WORK_DIR/manifests/*.yaml /var/lib/rancher/rke2/server/manifests/
 cp $WORK_DIR/registry/*.tar /var/lib/rancher/rke2/agent/images/
+cp $WORK_DIR/rke2_configuration.yaml /etc/rancher/rke2/config.yaml
 
 # perform actions with the extracted content
 process_tar

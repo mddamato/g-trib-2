@@ -86,9 +86,10 @@ compress-all: preflight-check
 	
 	rm -rf ${ENV_BUILD_CACHE}/manifests
 	cp -R ${ENV_CONFIG_DIR}/manifests ${ENV_BUILD_CACHE}/
+	cp -R ${ENV_CONFIG_DIR}/rke2_configuration.yaml ${ENV_BUILD_CACHE}/rke2_configuration.yaml
 
 	# compress the tar directory
-	tar -C ${ENV_BUILD_CACHE} -cf ${ENV_BUILD_CACHE}/payload.tar rke2 manifests registry
+	tar -C ${ENV_BUILD_CACHE} -cf ${ENV_BUILD_CACHE}/payload.tar rke2 manifests registry rke2_configuration.yaml
 	pigz ${ENV_BUILD_CACHE}/payload.tar
 
 	# seed the to_the_airgap.sh with deploy.sh]
