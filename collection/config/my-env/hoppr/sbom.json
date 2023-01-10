@@ -13,7 +13,11 @@
             "name": "skopeo.yaml",
             "purl": "pkg:generic/manifests/skopeo.yaml"
         },
-
+        {
+            "type": "file",
+            "name": "rke2_configuration.yaml",
+            "purl": "pkg:generic/rke2_configuration.yaml"
+        },
 
 
         {
@@ -25,12 +29,20 @@
 
 
 
+
+        {
+            "type": "library",
+            "name": "registry-v2",
+            "version": "latest",
+            "purl": "pkg:docker/ironbank/opensource/docker/registry-v2@latest"
+        },
         {
             "type": "library",
             "name": "skopeo",
             "version": "latest",
             "purl": "pkg:docker/ironbank/opensource/containers/skopeo@latest"
         },
+
 
         {
             "type": "library",

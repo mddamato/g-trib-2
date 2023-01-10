@@ -2,7 +2,7 @@
 process_tar() {
   cd $WORK_DIR
 
-  setenforce 0
+  #setenforce 0
 
   cd rke2
   chmod +x install.sh
@@ -39,12 +39,13 @@ chmod +x $WORK_DIR/bin/tar
 
 cat $0 | tail -1 | tr -d '\n' | base64 -d > $WORK_DIR/payload.tgz
 tar -zvxf $WORK_DIR/payload.tgz -C $WORK_DIR
+tar -vxf $WORK_DIR/hoppr.tar -C $WORK_DIR
 
 mkdir -p /var/lib/rancher/rke2/server/manifests/
 mkdir -p /var/lib/rancher/rke2/agent/images/
 mkdir -p /var/lib/rancher/registry
 chown -R 1000:root /var/lib/rancher/registry
-cp $WORK_DIR/manifests/*.yaml /var/lib/rancher/rke2/server/manifests/
+cp $WORK_DIR/generic/file%3A/manifests/*.yaml /var/lib/rancher/rke2/server/manifests/
 cp $WORK_DIR/registry/*.tar /var/lib/rancher/rke2/agent/images/
 cp $WORK_DIR/rke2_configuration.yaml /etc/rancher/rke2/config.yaml
 
