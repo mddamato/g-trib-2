@@ -22,6 +22,8 @@ help:
 
 .PHONY: preflight-check
 preflight-check:
+	mkdir -p ${ENV_CONFIG_DIR}
+	mkdir -p ${ENV_BUILD_CACHE}
 	if [ ! "${ENVIRONMENT}" ]; then \
 	  @echo "NO ENVIRONMENT DEFINED"; \
 	  exit 1; \
@@ -39,7 +41,15 @@ collect-rke2-dependencies: preflight-check
 	-e INSTALL_RKE2_VERSION=${RKE2_VERSION} \
 	rockylinux:8 /scripts/collect_rke2_dependencies.sh;
 
-
+# run hoppr
+.PHONY: hoppr
+hoppr: preflight-check
+	podman run \
+	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/opt/app,z \
+	--mount type=bind,source="${ENV_BUILD_CACHE}",target=/output,z \
+	-e REG1_USERNAME="${REG1_USERNAME}" \
+	-e REG1_PASSWORD="${REG1_PASSWORD}" \
+	hoppr/hopctl bundle hoppr/manifest.yaml --transfer hoppr/transfer.yaml --credentials hoppr/credentials.yaml
 
 # collect rke2 dependencies
 .PHONY: collect-tar-rpm

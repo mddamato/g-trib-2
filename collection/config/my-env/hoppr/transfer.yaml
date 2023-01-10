@@ -11,3 +11,6 @@ stages:
   Bundle:
     plugins:
     - name: "hoppr.core_plugins.bundle_tar"
+      config:
+        tarfile_name: /output/hoppr.tar
+        compression: none

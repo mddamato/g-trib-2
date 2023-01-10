@@ -5,17 +5,118 @@
     "components": [
         {
             "type": "file",
-            "name": ".bashrc",
-            "purl": "pkg:generic/${ENV_CONFIG_DIR}/manifests/registry.yaml"
+            "name": "registry.yaml",
+            "purl": "pkg:generic/manifests/registry.yaml"
         },
+        {
+            "type": "file",
+            "name": "skopeo.yaml",
+            "purl": "pkg:generic/manifests/skopeo.yaml"
+        },
+
+
 
         {
             "type": "library",
             "name": "hello-world",
             "version": "latest",
             "purl": "pkg:docker/rancher/rancher@v2.6.9"
+        },
 
+
+
+        {
+            "type": "library",
+            "name": "skopeo",
+            "version": "latest",
+            "purl": "pkg:docker/ironbank/opensource/containers/skopeo@latest"
+        },
+
+        {
+            "type": "library",
+            "name": "skopeo",
+            "version": "v1.21.9-rke2r1",
+            "purl": "pkg:docker/rancher/rke2-runtime@v1.21.9-rke2r1"
+        },
+        
+        {
+            "type": "library",
+            "name": "skopeo",
+            "version": "v1.21.9-rke2r1-build20220119",
+            "purl": "pkg:docker/rancher/hardened-kubernetes@v1.21.9-rke2r1-build20220119"
+        },
+
+        {
+            "type": "library",
+            "name": "skopeo",
+            "version": "v1.8.5-build20211119",
+            "purl": "pkg:docker/rancher/hardened-coredns@v1.8.5-build20211119"
+        },
+        {
+            "type": "library",
+            "name": "skopeo",
+            "version": "v1.8.5-build20211119",
+            "purl": "pkg:docker/rancher/hardened-cluster-autoscaler@v1.8.5-build20211119"
+        },
+        {
+            "type": "library",
+            "name": "skopeo",
+            "version": "1.21.2-build20211119",
+            "purl": "pkg:docker/rancher/hardened-dns-node-cache@1.21.2-build20211119"
+        },
+        {
+            "type": "library",
+            "name": "skopeo",
+            "version": "v3.4.18-k3s1-build20220118",
+            "purl": "pkg:docker/rancher/hardened-etcd@v3.4.18-k3s1-build20220118"
+        },
+        {
+            "type": "library",
+            "name": "skopeo",
+            "version": "v0.5.0-build20211119",
+            "purl": "pkg:docker/rancher/hardened-k8s-metrics-server@v0.5.0-build20211119"
+        },
+        {
+            "type": "library",
+            "name": "skopeo",
+            "version": "v0.6.8-build20211123",
+            "purl": "pkg:docker/rancher/klipper-helm@v0.6.8-build20211123"
+        },
+        {
+            "type": "library",
+            "name": "skopeo",
+            "version": "3.6",
+            "purl": "pkg:docker/rancher/pause@3.6"
+        },
+        {
+            "type": "library",
+            "name": "skopeo",
+            "version": "v1.0",
+            "purl": "pkg:docker/rancher/pause@v1.0"
+        },
+        {
+            "type": "library",
+            "name": "skopeo",
+            "version": "nginx-1.0.2-hardened2",
+            "purl": "pkg:docker/rancher/nginx-ingress-controller@nginx-1.0.2-hardened2"
+        },
+        {
+            "type": "library",
+            "name": "skopeo",
+            "version": "v0.0.3-build20211118",
+            "purl": "pkg:docker/rancher/rke2-cloud-provider@v0.0.3-build20211118"
+        },
+        {
+            "type": "library",
+            "name": "skopeo",
+            "version": "v3.20.3-build20220114",
+            "purl": "pkg:docker/rancher/hardened-calico@v3.20.3-build20220114"
+        },
+        {
+            "type": "library",
+            "name": "skopeo",
+            "version": "v0.15.1-build20211119",
+            "purl": "pkg:docker/rancher/hardened-flannel@v0.15.1-build20211119"
         }
-
      ]
 }

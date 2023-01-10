@@ -15,10 +15,8 @@ includes: []
 repositories:
   generic:
   - url: "file:"
-  # - url: https://hoppr.dev/
+
   docker:
-  - url: https://docker.io
   - url: https://registry1.dso.mil
+  - url: https://docker.io
   - url: https://quay.io
-  # git:
-  # - url: https://gitlab.com
