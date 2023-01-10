@@ -2,12 +2,23 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: skopeo
+  namespace: glowing-tribble
 spec:
   template:
     spec:
+      volumes:
+        - name: skopeo-source
+          hostPath:
+            path: /tmp/registry/db
+            type: Directory
       containers:
       - name: skopeo
         image: registry1.dso.mil/ironbank/opensource/containers/skopeo:latest
-        command: ["--help"]
+        args: ["sync", "--dest-no-creds", "--dest-tls-verify=false", "--src", "dir", "--dest", "docker", "/home/skopeo/db", "registry-insecure:5000/"]
+        imagePullPolicy: Never
+        volumeMounts:
+        - name: skopeo-source
+          mountPath: /home/skopeo/db
+          readOnly: true
       restartPolicy: Never
-  backoffLimit: 4
+  backoffLimit: 14

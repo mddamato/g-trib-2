@@ -27,20 +27,18 @@ spec:
       volumes:
         - name: registry-data
           hostPath:
-            path: /tmp/registry/db/
+            path: /var/lib/rancher/registry
             type: Directory
       containers:
       - name: registry-insecure
         env:
-        #image: docker.io/library/registry:2
-        image: docker.io/library/registry:2
+        image: registry1.dso.mil/ironbank/opensource/docker/registry-v2:latest
         imagePullPolicy: Never
         ports:
         - containerPort: 5000
         volumeMounts:
         - name: registry-data
           mountPath: /var/lib/registry
-          readOnly: true
 ---
 apiVersion: v1
 kind: Service

@@ -1,0 +1,21 @@
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.4",
+    "version": 1,
+    "components": [
+        {
+            "type": "file",
+            "name": ".bashrc",
+            "purl": "pkg:generic/${ENV_CONFIG_DIR}/manifests/registry.yaml"
+        },
+
+        {
+            "type": "library",
+            "name": "hello-world",
+            "version": "latest",
+            "purl": "pkg:docker/rancher/rancher@v2.6.9"
+
+        }
+
+     ]
+}

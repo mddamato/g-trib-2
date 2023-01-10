@@ -1,0 +1,24 @@
+---
+schemaVersion: v1
+kind: manifest
+
+metadata:
+  name: "My First Manifest"
+  version: 0.1.0
+  description: "An introductory manifest"
+
+sboms:
+  - local: sbom.json
+
+includes: []
+
+repositories:
+  generic:
+  - url: "file:"
+  # - url: https://hoppr.dev/
+  docker:
+  - url: https://docker.io
+  - url: https://registry1.dso.mil
+  - url: https://quay.io
+  # git:
+  # - url: https://gitlab.com

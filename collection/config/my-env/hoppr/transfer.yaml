@@ -1,0 +1,13 @@
+---
+schemaVersion: v1
+kind: Transfer
+
+stages:
+  Collect:
+    plugins:
+    - name: "hoppr.core_plugins.collect_docker_plugin"
+    - name: "hoppr.core_plugins.collect_git_plugin"
+    - name: "hoppr.core_plugins.collect_raw_plugin"
+  Bundle:
+    plugins:
+    - name: "hoppr.core_plugins.bundle_tar"

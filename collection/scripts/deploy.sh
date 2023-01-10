@@ -42,6 +42,8 @@ tar -zvxf $WORK_DIR/payload.tgz -C $WORK_DIR
 
 mkdir -p /var/lib/rancher/rke2/server/manifests/
 mkdir -p /var/lib/rancher/rke2/agent/images/
+mkdir -p /var/lib/rancher/registry
+chown -R 1000:root /var/lib/rancher/registry
 cp $WORK_DIR/manifests/*.yaml /var/lib/rancher/rke2/server/manifests/
 cp $WORK_DIR/registry/*.tar /var/lib/rancher/rke2/agent/images/
 cp $WORK_DIR/rke2_configuration.yaml /etc/rancher/rke2/config.yaml

@@ -16,8 +16,7 @@ help:
 	@echo Options:
 	@echo collect-rke2-dependencies
 	@echo collect-tar-rpm
-	@echo compress-all
-	@echo collect-utility
+	@echo collect-images
 	@echo collect-registry-artifacts
 	@echo compress-all
 
@@ -57,7 +56,10 @@ collect-tar-rpm: preflight-check
 
 # collect rke2 dependencies
 .PHONY: collect-images
-collect-utility: preflight-check
+collect-images: preflight-check
+
+	mkdir -p ${ENV_BUILD_CACHE}/registry
+
 	podman build -f `pwd`/utility/Dockerfile $(pwd)/../ -t utility:latest
 	podman save utility -o ${ENV_BUILD_CACHE}/registry/utility.tar
 
