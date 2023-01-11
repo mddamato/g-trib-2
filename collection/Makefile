@@ -47,9 +47,13 @@ hoppr: preflight-check
 	podman run \
 	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/opt/app,z \
 	--mount type=bind,source="${ENV_BUILD_CACHE}",target=/output,z \
-	--mount type=bind,source="/run/containers/0/auth.json",target=/run/containers/0/auth.json,z \
-	hoppr/hopctl bundle hoppr/manifest.yaml --transfer hoppr/transfer.yaml
+        --env=REG1_PASSWORD=${REG1_PASSWORD} \
+        --env=HOPPR_TRANSFER_CONFIG=hoppr/transfer.yaml \
+        --env=HOPPR_LOG_FILE=/output/hoppr.log \
+        --env=HOPPR_CREDS_CONFIG=hoppr/credentials.yaml \
+	hoppr/hopctl bundle hoppr/manifest.yaml
 
+#	--mount type=bind,source="/run/containers/0/auth.json",target=/run/containers/0/auth.json,z \
 # collect rke2 dependencies
 .PHONY: collect-tar-rpm
 collect-tar-rpm: preflight-check
