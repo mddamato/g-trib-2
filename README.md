@@ -89,3 +89,8 @@ docker build -t util -f Dockerfile-util-airgap .
 curl -LO https://rfed-public.s3-us-gov-east-1.amazonaws.com/bundles/rke-government-deps-offline-bundle-el8-v1.23.5%2Brke2r1.tar.gz
 tar xzf rke-government-deps-offline-bundle-el8-v1.23.5%2Brke2r1.tar.gz
 sudo chmod +x install.sh && sudo ./install.sh
+
+# PGP Notes
+
+gpg --output public.pgp --armor --export C21FDF0CBD8D0CDE890B6CE9B1EAF7DF3D0A1F1A
+gpg --output private.pgp --armor --export-secret-key C21FDF0CBD8D0CDE890B6CE9B1EAF7DF3D0A1F1A

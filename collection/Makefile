@@ -3,8 +3,11 @@
 SHELL 						:= /bin/bash
 ENV_CONFIG_DIR					?= $(CURDIR)/config/${ENVIRONMENT}
 ENV_BUILD_CACHE					?= ${ENV_CONFIG_DIR}/.cache
+VERSION 									= $(shell git describe --tags --exact-match 2>/dev/null || git symbolic-ref -q --short HEAD)
+COMMIT_HASH									= $(shell git rev-parse --short HEAD 2>/dev/null)
+BUILD_DATE 									= $(shell date +%FT%T%z)
 
-export ENV_OVERRIDE_PATH 			?= $(CURDIR)/config/${ENVIRONMENT}/Makefile
+export PASSWORD_ENV_FILE 			?= $(CURDIR)/config/${ENVIRONMENT}/passwords.env
 
 -include $(ENV_OVERRIDE_PATH)
 
@@ -24,8 +27,7 @@ help:
 preflight-check:
 
 
-
-
+	echo ${REG1X_PASSWORD}
 	mkdir -p ${ENV_CONFIG_DIR}
 	mkdir -p ${ENV_BUILD_CACHE}
 	if [ ! "${ENVIRONMENT}" ]; then \
@@ -33,7 +35,24 @@ preflight-check:
 	  exit 1; \
 	fi
 
-	read -sp 'Enter Ironbank registry Password: ' REG1_PASSWORD
+	if [[ -z "${REG1_USERNAME}" ]]; then
+		read -p 'Enter Ironbank registry username: ' REG1_USERNAME
+# $(eval REG1_USERNAME := ${REG1_USERNAME})
+		override REG1_USERNAME = ${REG1_USERNAME}
+	fi
+	if [[ -z "${REG1_PASSWORD}" ]]; then
+		read -sp 'Enter Ironbank registry password: ' REG1_PASSWORD
+# $(eval REG1_PASSWORD := ${REG1_PASSWORD})
+		override REG1_USERNAME = ${REG1_USERNAME}
+	fi
+
+	function cleanup()
+	{
+		echo "running cleanup"
+		stty echo
+	}
+	trap cleanup EXIT
+	podman login --username ${REG1_USERNAME} --password ${REG1_PASSWORD} registry1.dso.mil
 
 
 
@@ -59,11 +78,12 @@ hoppr: preflight-check
 		stty echo
 	}
 	trap cleanup EXIT
+	echo ${REG1_PASSWORD}
 	podman run \
 	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/opt/app,z \
 	--mount type=bind,source="${ENV_BUILD_CACHE}",target=/output,z \
 	-e REG1_PASSWORD=${REG1_PASSWORD} \
-	docker.io/hoppr/hopctl:latest bundle hoppr/manifest.yaml --transfer hoppr/transfer.yaml
+	docker.io/hoppr/hopctl:latest bundle hoppr/manifest.yaml --transfer hoppr/transfer.yaml --credentials hoppr/credentials.yaml
 
 
 # collect rke2 dependencies
@@ -85,8 +105,8 @@ collect-images: preflight-check
 
 	mkdir -p ${ENV_BUILD_CACHE}/registry
 
-	podman build -f `pwd`/utility/Dockerfile $(pwd)/utility/ -t utility:latest
-	podman save utility -o ${ENV_BUILD_CACHE}/registry/utility.tar
+	podman build -f `pwd`/utility/Dockerfile `pwd`/utility/ -t utility:latest
+	podman save utility:latest -o ${ENV_BUILD_CACHE}/registry/utility.tar
 
 # rm -f ${ENV_BUILD_CACHE}/registry/registry.tar
 # podman pull registry1.dso.mil/ironbank/opensource/docker/registry-v2:latest
