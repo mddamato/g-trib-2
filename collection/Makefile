@@ -7,9 +7,9 @@ VERSION 									= $(shell git describe --tags --exact-match 2>/dev/null || git 
 COMMIT_HASH									= $(shell git rev-parse --short HEAD 2>/dev/null)
 BUILD_DATE 									= $(shell date +%FT%T%z)
 
-export PASSWORD_ENV_FILE 			?= $(CURDIR)/config/${ENVIRONMENT}/passwords.env
+export ENVIRONMENT_OVERRIDES 			?= $(CURDIR)/config/${ENVIRONMENT}/Makefile
 
--include $(ENV_OVERRIDE_PATH)
+-include $(ENVIRONMENT_OVERRIDES)
 
 ## export all vars
 export
@@ -27,35 +27,28 @@ help:
 preflight-check:
 
 
-	echo ${REG1X_PASSWORD}
 	mkdir -p ${ENV_CONFIG_DIR}
 	mkdir -p ${ENV_BUILD_CACHE}
+	mkdir -p ${ENV_BUILD_CACHE}/tmp
+
 	if [ ! "${ENVIRONMENT}" ]; then \
 	  @echo "NO ENVIRONMENT DEFINED"; \
 	  exit 1; \
 	fi
-
-	if [[ -z "${REG1_USERNAME}" ]]; then
-		read -p 'Enter Ironbank registry username: ' REG1_USERNAME
-# $(eval REG1_USERNAME := ${REG1_USERNAME})
-		override REG1_USERNAME = ${REG1_USERNAME}
-	fi
-	if [[ -z "${REG1_PASSWORD}" ]]; then
-		read -sp 'Enter Ironbank registry password: ' REG1_PASSWORD
-# $(eval REG1_PASSWORD := ${REG1_PASSWORD})
-		override REG1_USERNAME = ${REG1_USERNAME}
+	if [ ! "${SECRETS_FILE}" ]; then \
+	  @echo "NO SECRETS_FILE DEFINED"; \
+	  exit 1; \
 	fi
 
 	function cleanup()
 	{
-		echo "running cleanup"
 		stty echo
 	}
 	trap cleanup EXIT
-	podman login --username ${REG1_USERNAME} --password ${REG1_PASSWORD} registry1.dso.mil
-
-
-
+	stty -echo
+	REG1_PASSWORD=`sops --config ${ENV_CONFIG_DIR}/.sops.yaml --output-type dotenv --decrypt --extract '["REG1_PASSWORD"]' ${SECRETS_FILE}`
+	REG1_USERNAME=`sops --config ${ENV_CONFIG_DIR}/.sops.yaml --output-type dotenv --decrypt --extract '["REG1_USERNAME"]' ${SECRETS_FILE}`
+	podman login --username $$REG1_USERNAME --password $$REG1_PASSWORD registry1.dso.mil
 
 # collect rke2 dependencies
 .PHONY: collect-rke2-dependencies
@@ -72,19 +65,25 @@ collect-rke2-dependencies: preflight-check
 # run hoppr
 .PHONY: hoppr
 hoppr: preflight-check
+	mkdir -p ${ENV_BUILD_CACHE}/tmp
 	function cleanup()
 	{
-		echo "running cleanup"
-		stty echo
+		rm -f ${ENV_BUILD_CACHE}/tmp/credentials.yaml
 	}
 	trap cleanup EXIT
-	echo ${REG1_PASSWORD}
+
+	REG1_USERNAME=`sops --config ${ENV_CONFIG_DIR}/.sops.yaml --output-type dotenv --decrypt --extract '["REG1_USERNAME"]' ${SECRETS_FILE}`
+
+	export REG1_USERNAME=$${REG1_USERNAME} && envsubst ${REG1_USERNAME} <${ENV_CONFIG_DIR}/hoppr/credentials.yaml >${ENV_BUILD_CACHE}/tmp/credentials.yaml
+
 	podman run \
 	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/opt/app,z \
 	--mount type=bind,source="${ENV_BUILD_CACHE}",target=/output,z \
-	-e REG1_PASSWORD=${REG1_PASSWORD} \
-	docker.io/hoppr/hopctl:latest bundle hoppr/manifest.yaml --transfer hoppr/transfer.yaml --credentials hoppr/credentials.yaml
-
+	--env=HOPPR_TRANSFER_CONFIG=hoppr/transfer.yaml \
+	--env=HOPPR_LOG_FILE=/output/hoppr.log \
+	--env=HOPPR_CREDS_CONFIG=/output/tmp/credentials.yaml \
+	docker.io/hoppr/hopctl:latest bundle hoppr/manifest.yaml
+	
 
 # collect rke2 dependencies
 .PHONY: collect-tar-rpm

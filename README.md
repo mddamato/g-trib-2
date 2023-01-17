@@ -14,7 +14,7 @@ Requirements:
 - rm -f ${HOME}/public.pgp ${HOME}/private.pgp
 
 Example command:
-- make ENVIRONMENT=my-env collect-rke2-dependencies collect-tar-rpm collect-images hoppr compress-all
+- make ENVIRONMENT=my-env SECRETS_FILE=config/my-env/secret_mdd.env collect-rke2-dependencies collect-tar-rpm collect-images hoppr compress-all
 
 
 Dependencies to collect:
@@ -98,3 +98,18 @@ sudo chmod +x install.sh && sudo ./install.sh
 
 gpg --output public.pgp --armor --export C21FDF0CBD8D0CDE890B6CE9B1EAF7DF3D0A1F1A
 gpg --output private.pgp --armor --export-secret-key C21FDF0CBD8D0CDE890B6CE9B1EAF7DF3D0A1F1A
+
+sops --config config/my-env/.sops.yaml --encrypt /home/admin/g-trib-2/collection/config/my-env/secret_mdd.env
+
+sops --config config/my-env/.sops.yaml --encrypt /home/admin/g-trib-2/collection/config/my-env/secret_ajm.env
+
+sops --config config/my-env/.sops.yaml --decrypt config/my-env/hoppr/credentials.yaml > config/my-env/.cache/secrets
+
+sops --config config/my-env/.sops.yaml updatekeys config/my-env/hoppr/credentials.yaml
+
+sops --config config/my-env/.sops.yaml config/my-env/secret_mdd.env
+
+## note
+	REG1_PASSWORD=`sops --config ${ENV_CONFIG_DIR}/.sops.yaml --output-type yaml --decrypt --extract '["credential_required_services"][0]["pass"]' config/my-env/hoppr/credentials.yaml`
+	REG1_USERNAME=`sops --config ${ENV_CONFIG_DIR}/.sops.yaml --output-type yaml --decrypt --extract '["credential_required_services"][0]["user"]' config/my-env/hoppr/credentials.yaml`
+	podman login --username $$REG1_USERNAME --password $$REG1_PASSWORD registry1.dso.mil
