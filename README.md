@@ -7,9 +7,10 @@ Requirements:
 - sysctl user.max_user_namespaces=15000
 - git clone https://github.com/mddamato/g-trib-2.git /opt/g-trib-2
 - cd /opt/g-trib-2/collection
+- podman login registry1.dso.mil
 
 Example command:
-- make collect-rke2-dependencies ENVIRONMENT=my-env
+- make ENVIRONMENT=my-env collect-rke2-dependencies collect-tar-rpm collect-images hoppr compress-all
 
 
 Dependencies to collect:

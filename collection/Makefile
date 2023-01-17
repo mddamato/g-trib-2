@@ -22,12 +22,21 @@ help:
 
 .PHONY: preflight-check
 preflight-check:
+
+
+
+
 	mkdir -p ${ENV_CONFIG_DIR}
 	mkdir -p ${ENV_BUILD_CACHE}
 	if [ ! "${ENVIRONMENT}" ]; then \
 	  @echo "NO ENVIRONMENT DEFINED"; \
 	  exit 1; \
 	fi
+
+	read -sp 'Enter Ironbank registry Password: ' REG1_PASSWORD
+
+
+
 
 # collect rke2 dependencies
 .PHONY: collect-rke2-dependencies
@@ -44,11 +53,18 @@ collect-rke2-dependencies: preflight-check
 # run hoppr
 .PHONY: hoppr
 hoppr: preflight-check
+	function cleanup()
+	{
+		echo "running cleanup"
+		stty echo
+	}
+	trap cleanup EXIT
 	podman run \
 	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/opt/app,z \
 	--mount type=bind,source="${ENV_BUILD_CACHE}",target=/output,z \
-	--mount type=bind,source="/run/containers/0/auth.json",target=/run/containers/0/auth.json,z \
-	hoppr/hopctl bundle hoppr/manifest.yaml --transfer hoppr/transfer.yaml
+	-e REG1_PASSWORD=${REG1_PASSWORD} \
+	docker.io/hoppr/hopctl:latest bundle hoppr/manifest.yaml --transfer hoppr/transfer.yaml
+
 
 # collect rke2 dependencies
 .PHONY: collect-tar-rpm
@@ -69,7 +85,7 @@ collect-images: preflight-check
 
 	mkdir -p ${ENV_BUILD_CACHE}/registry
 
-	podman build -f `pwd`/utility/Dockerfile $(pwd)/../ -t utility:latest
+	podman build -f `pwd`/utility/Dockerfile $(pwd)/utility/ -t utility:latest
 	podman save utility -o ${ENV_BUILD_CACHE}/registry/utility.tar
 
 # rm -f ${ENV_BUILD_CACHE}/registry/registry.tar
