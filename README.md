@@ -3,11 +3,15 @@
 ## Overall Stages
 
 Requirements:
-- yum install -y make git podman skopeo
-- sysctl user.max_user_namespaces=15000
+- curl -LO https://github.com/mozilla/sops/releases/download/v3.7.3/sops-3.7.3-1.x86_64.rpm
+- sudo yum install -y make git podman skopeo gnupg pinentry ./sops-*.rpm
 - git clone https://github.com/mddamato/g-trib-2.git /opt/g-trib-2
 - cd /opt/g-trib-2/collection
-- podman login registry1.dso.mil
+- gpg --list-keys
+- # place keys in home directory
+- gpg --import ${HOME}/public.pgp
+- gpg --import ${HOME}/private.pgp
+- rm -f ${HOME}/public.pgp ${HOME}/private.pgp
 
 Example command:
 - make ENVIRONMENT=my-env collect-rke2-dependencies collect-tar-rpm collect-images hoppr compress-all
