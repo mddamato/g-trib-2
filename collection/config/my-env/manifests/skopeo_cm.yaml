@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: skopeo-cm
+  namespace: glowing-tribble
+data:
+  game.properties: |
+    for FILEPATH in ${find -type f /home/skopeo/source);do
+      SANS_HEADER=$(echo ${FILEPATH} | sed {'s/https%3A%2F%2F//'})
+      image_name=$(echo ${SANS_HEADER} | awk -F '_' {'print $1'})
+      image_tag=$(echo ${SANS_HEADER} | awk -F '_' {'print $2'})
+      echo $SANS_HEADER
+      echo $image_name
+      echo $image_tag
+    done
+
+    #args: ["sync", "--dest-no-creds", "--dest-tls-verify=false", "--src", "dir", "--dest", "docker", "/home/skopeo/db", "registry-insecure:5000/"]

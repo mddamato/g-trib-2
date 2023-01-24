@@ -73,15 +73,17 @@ hoppr: preflight-check
 	trap cleanup EXIT
 
 	REG1_USERNAME=`sops --config ${ENV_CONFIG_DIR}/.sops.yaml --output-type dotenv --decrypt --extract '["REG1_USERNAME"]' ${SECRETS_FILE}`
-
+	
 	export REG1_USERNAME=$${REG1_USERNAME} && envsubst ${REG1_USERNAME} <${ENV_CONFIG_DIR}/hoppr/credentials.yaml >${ENV_BUILD_CACHE}/tmp/credentials.yaml
 
+	rm -f ${ENV_BUILD_CACHE}/hoppr.tar
 	podman run \
 	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/opt/app,z \
 	--mount type=bind,source="${ENV_BUILD_CACHE}",target=/output,z \
 	--env=HOPPR_TRANSFER_CONFIG=hoppr/transfer.yaml \
 	--env=HOPPR_LOG_FILE=/output/hoppr.log \
 	--env=HOPPR_CREDS_CONFIG=/output/tmp/credentials.yaml \
+	--env=REG1_PASSWORD=`sops --config ${ENV_CONFIG_DIR}/.sops.yaml --output-type dotenv --decrypt --extract '["REG1_PASSWORD"]' ${SECRETS_FILE}` \
 	docker.io/hoppr/hopctl:latest bundle hoppr/manifest.yaml
 	
 
@@ -98,22 +100,23 @@ collect-tar-rpm: preflight-check
 	rockylinux:$${releasever} -c "cp /usr/bin/tar ./.cache/bin"; \
 	done
 
-# collect rke2 dependencies
+
 .PHONY: collect-images
 collect-images: preflight-check
 
 	mkdir -p ${ENV_BUILD_CACHE}/registry
 
+	rm -f ${ENV_BUILD_CACHE}/registry/utility.tar
 	podman build -f `pwd`/utility/Dockerfile `pwd`/utility/ -t utility:latest
 	podman save utility:latest -o ${ENV_BUILD_CACHE}/registry/utility.tar
 
-# rm -f ${ENV_BUILD_CACHE}/registry/registry.tar
-# podman pull registry1.dso.mil/ironbank/opensource/docker/registry-v2:latest
-# podman save registry1.dso.mil/ironbank/opensource/docker/registry-v2:latest -o ${ENV_BUILD_CACHE}/registry/registry.tar
+	rm -f ${ENV_BUILD_CACHE}/registry/registry.tar
+	podman pull registry1.dso.mil/ironbank/opensource/docker/registry-v2:latest
+	podman save registry1.dso.mil/ironbank/opensource/docker/registry-v2:latest -o ${ENV_BUILD_CACHE}/registry/registry.tar
 
-# rm -f ${ENV_BUILD_CACHE}/registry/skopeo.tar
-# podman pull registry1.dso.mil/ironbank/opensource/containers/skopeo:latest
-# podman save registry1.dso.mil/ironbank/opensource/containers/skopeo:latest -o ${ENV_BUILD_CACHE}/registry/skopeo.tar
+	rm -f ${ENV_BUILD_CACHE}/registry/skopeo.tar
+	podman pull registry1.dso.mil/ironbank/opensource/containers/skopeo:latest
+	podman save registry1.dso.mil/ironbank/opensource/containers/skopeo:latest -o ${ENV_BUILD_CACHE}/registry/skopeo.tar
 
 
 # build registry database
@@ -131,7 +134,7 @@ collect-images: preflight-check
 compress-all: preflight-check
 	
 	# compress the tar directory
-	tar -C ${ENV_BUILD_CACHE} -cf ${ENV_BUILD_CACHE}/payload.tar rke2 hoppr.tar
+	tar -C ${ENV_BUILD_CACHE} -cf ${ENV_BUILD_CACHE}/payload.tar rke2 hoppr.tar registry
 	pigz ${ENV_BUILD_CACHE}/payload.tar
 
 	# seed the to_the_airgap.sh with deploy.sh]

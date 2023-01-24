@@ -9,16 +9,24 @@ spec:
       volumes:
         - name: skopeo-source
           hostPath:
-            path: /tmp/registry/db
+            path: /tmp/docker
             type: Directory
+
+        - name: script
+          configMap:
+            name: skopeo-cm
+
       containers:
       - name: skopeo
         image: registry1.dso.mil/ironbank/opensource/containers/skopeo:latest
-        args: ["sync", "--dest-no-creds", "--dest-tls-verify=false", "--src", "dir", "--dest", "docker", "/home/skopeo/db", "registry-insecure:5000/"]
+        command: [ "/bin/bash", "-c", "/opt/script.sh" ]
         imagePullPolicy: Never
         volumeMounts:
         - name: skopeo-source
-          mountPath: /home/skopeo/db
+          mountPath: /home/skopeo/source
           readOnly: true
+        - name: script
+          mountPath: /opt/script.sh
       restartPolicy: Never
+
   backoffLimit: 14

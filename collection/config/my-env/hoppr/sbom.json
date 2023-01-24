@@ -15,6 +15,11 @@
         },
         {
             "type": "file",
+            "name": "skopeo_cm.yaml",
+            "purl": "pkg:generic/manifests/skopeo_cm.yaml"
+        },
+        {
+            "type": "file",
             "name": "rke2_configuration.yaml",
             "purl": "pkg:generic/rke2_configuration.yaml"
         },
