@@ -80,11 +80,12 @@ hoppr: preflight-check
 	podman run \
 	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/opt/app,z \
 	--mount type=bind,source="${ENV_BUILD_CACHE}",target=/output,z \
-	--env=HOPPR_TRANSFER_CONFIG=hoppr/transfer.yaml \
+	--env=HOPPR_TRANSFER_CONFIG=/opt/app/hoppr/transfer.yaml \
 	--env=HOPPR_LOG_FILE=/output/hoppr.log \
+	-w /opt/app \
 	--env=HOPPR_CREDS_CONFIG=/output/tmp/credentials.yaml \
 	--env=REG1_PASSWORD=`sops --config ${ENV_CONFIG_DIR}/.sops.yaml --output-type dotenv --decrypt --extract '["REG1_PASSWORD"]' ${SECRETS_FILE}` \
-	docker.io/hoppr/hopctl:latest bundle hoppr/manifest.yaml
+	docker.io/hoppr/hopctl:latest bundle /opt/app/hoppr/manifest.yaml
 	
 
 # collect rke2 dependencies
