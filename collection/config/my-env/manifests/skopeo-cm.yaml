@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: skopeo-cm
+  namespace: glowing-tribble
+data:
+  script.sh: |
+    #!/bin/bash
+    for FILEPATH in $(find /var/lib/registry -type f);do
+        SANS_HEADER=$(echo ${FILEPATH} | sed {'s/https%3A%2F%2F//'} | sed 's_/var/lib/registry/__' )
+        IMAGE_TAG=${SANS_HEADER#*\_}
+        IMAGE_REGISTRY_REPO_NAME=${SANS_HEADER%\_*}
+        IMAGE_REPO_NAME=${IMAGE_REGISTRY_REPO_NAME#*/}
+        IMAGE_NAME=$(echo $IMAGE_REPO_NAME | awk -F "/" '{ print $NF }')
+        IMAGE_REPO=${IMAGE_REPO_NAME%/*}
+        
+        echo "repo: $IMAGE_REPO"
+        echo "image name: $IMAGE_NAME"
+        echo "image tag: $IMAGE_TAG"
+        echo "pushing image $DEST_REGISTRY_HOST:$DEST_REGISTRY_PORT/$IMAGE_REPO/$IMAGE_NAME:$IMAGE_TAG"
+        echo "from $FILEPATH"
+
+        skopeo copy --dest-no-creds --dest-tls-verify=false docker-archive:$FILEPATH docker://$DEST_REGISTRY_HOST:$DEST_REGISTRY_PORT/$IMAGE_REPO/$IMAGE_NAME:$IMAGE_TAG
+    done

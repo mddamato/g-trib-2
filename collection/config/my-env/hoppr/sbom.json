@@ -15,8 +15,8 @@
         },
         {
             "type": "file",
-            "name": "skopeo_cm.yaml",
-            "purl": "pkg:generic/manifests/skopeo_cm.yaml"
+            "name": "skopeo-cm.yaml",
+            "purl": "pkg:generic/manifests/skopeo-cm.yaml"
         },
         {
             "type": "file",

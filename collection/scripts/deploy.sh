@@ -43,8 +43,19 @@ tar -vxf $WORK_DIR/hoppr.tar -C $WORK_DIR
 
 mkdir -p /var/lib/rancher/rke2/server/manifests/
 mkdir -p /var/lib/rancher/rke2/agent/images/
+
 mkdir -p /var/lib/rancher/registry
-chown -R 1000:root /var/lib/rancher/registry
+chown -R root:1000 /var/lib/rancher/registry
+chmod 770 /var/lib/rancher/registry
+semanage fcontext -a -t container_file_t "/var/lib/rancher/registry(/.*)?" || true
+restorecon -Rv /var/lib/rancher/registry
+
+chown -R root:1000 $WORK_DIR/docker
+chmod -R 770 $WORK_DIR/docker
+semanage fcontext -a -t container_file_t "$WORK_DIR/docker(/.*)?" || true
+restorecon -Rv $WORK_DIR/docker
+
+
 cp $WORK_DIR/generic/file%3A/manifests/*.yaml /var/lib/rancher/rke2/server/manifests/
 cp $WORK_DIR/registry/*.tar /var/lib/rancher/rke2/agent/images/
 #cp $WORK_DIR/rke2_configuration.yaml /etc/rancher/rke2/config.yaml

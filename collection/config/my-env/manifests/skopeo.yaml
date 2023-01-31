@@ -6,6 +6,9 @@ metadata:
 spec:
   template:
     spec:
+      securityContext:
+        fsGroup: 1000
+
       volumes:
         - name: skopeo-source
           hostPath:
@@ -15,18 +18,29 @@ spec:
         - name: script
           configMap:
             name: skopeo-cm
-
+            defaultMode: 0110
+          
       containers:
       - name: skopeo
+
         image: registry1.dso.mil/ironbank/opensource/containers/skopeo:latest
-        command: [ "/bin/bash", "-c", "/opt/script.sh" ]
+        command: [ "/bin/bash", "-c" ]
+        args: [ "/opt/script.sh" ]
+        # args: [ "sleep 10000" ]
         imagePullPolicy: Never
+        env:
+        - name: DEST_REGISTRY_HOST
+          value: "registry-insecure"
+        - name: DEST_REGISTRY_PORT
+          value: "5000"
         volumeMounts:
         - name: skopeo-source
-          mountPath: /home/skopeo/source
-          readOnly: true
+          mountPath: /var/lib/registry
+
         - name: script
           mountPath: /opt/script.sh
+          subPath: script.sh
+
       restartPolicy: Never
 
   backoffLimit: 14
