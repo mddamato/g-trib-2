@@ -113,3 +113,107 @@ sops --config config/my-env/.sops.yaml config/my-env/secret_mdd.env
 	REG1_PASSWORD=`sops --config ${ENV_CONFIG_DIR}/.sops.yaml --output-type yaml --decrypt --extract '["credential_required_services"][0]["pass"]' config/my-env/hoppr/credentials.yaml`
 	REG1_USERNAME=`sops --config ${ENV_CONFIG_DIR}/.sops.yaml --output-type yaml --decrypt --extract '["credential_required_services"][0]["user"]' config/my-env/hoppr/credentials.yaml`
 	podman login --username $$REG1_USERNAME --password $$REG1_PASSWORD registry1.dso.mil
+
+
+
+
+
+# generating test certificates
+
+> These are stored as registry_certs.yaml and ca_certs.yaml in the secrets directory
+
+```shell
+cat > CA_Issuer_Bootstrap.yaml <<EOF
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: glowing-tribble
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: selfsigned-issuer
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: g-trib-ca
+  namespace: glowing-tribble
+spec:
+  isCA: true
+  commonName: g-trib-ca
+  secretName: root-secret
+  duration: 26280h
+  privateKey:
+    algorithm: ECDSA
+    size: 521
+  issuerRef:
+    name: selfsigned-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: g-trib-issuer
+  namespace: glowing-tribble
+spec:
+  ca:
+    secretName: root-secret
+EOF
+kubectl apply -f CA_Issuer_Bootstrap.yaml
+
+cat > registry_cert.yaml <<EOF
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: registry-glowing-tribble-com
+  namespace: glowing-tribble
+spec:
+  secretName: registry-glowing-tribble-com-tls
+  duration: 8760h
+  renewBefore: 360h
+  subject:
+    organizations:
+      - Glowing-Tribble-Mega-Corporation
+  commonName: registry.glowing-tribble.com
+  isCA: false
+  privateKey:
+    algorithm: ECDSA
+    size: 521
+  usages:
+    - server auth
+    - client auth
+  dnsNames:
+    - registry.glowing-tribble.com
+    - registry.glowing-tribble.svc.cluster.local
+    - www.registry.glowing-tribble.com
+  issuerRef:
+    name:  g-trib-issuer
+    kind: Issuer
+    group: cert-manager.io
+EOF
+kubectl apply -f registry_cert.yaml
+
+kubectl get secret registry-glowing-tribble-com-tls -n glowing-tribble -o yaml
+kubectl get secret root-secret -n glowing-tribble -o yaml
+
+kubectl delete -f registry_cert.yaml
+kubectl delete -f CA_Issuer_Bootstrap.yaml
+```
+
+# vault notes
+
+vault secrets enable pki
+vault secrets tune -max-lease-ttl=87600h pki
+vault write pki/root/generate/internal common_name=glowing-tribble.com ttl=87600h
+vault write pki/config/urls issuing_certificates="http://vault.glowing-tribble.com:8200/v1/pki/ca" crl_distribution_points="http://vault.glowing-tribble.com:8200/v1/pki/crl"
+vault write pki/roles/example-dot-com \
+    allowed_domains=example.com \
+    allow_subdomains=true max_ttl=72h
+
+vault write pki/issue/example-dot-com \
+    common_name=blah.example.com

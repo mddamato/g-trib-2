@@ -3,6 +3,22 @@
     "specVersion": "1.4",
     "version": 1,
     "components": [
+
+
+        {
+            "type": "file",
+            "name": "registry.tar",
+            "purl": "pkg:generic/.cache/registry/registry.tar"
+        },
+        {
+            "type": "file",
+            "name": "skopeo.tar",
+            "purl": "pkg:generic/.cache/registry/skopeo.tar"
+        },
+
+        
+        
+        
         {
             "type": "file",
             "name": "registry.yaml",

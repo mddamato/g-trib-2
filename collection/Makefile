@@ -62,44 +62,8 @@ collect-rke2-dependencies: preflight-check
 	-e INSTALL_RKE2_VERSION=${RKE2_VERSION} \
 	rockylinux:8 /scripts/collect_rke2_dependencies.sh;
 
-# run hoppr
-.PHONY: hoppr
-hoppr: preflight-check
-	mkdir -p ${ENV_BUILD_CACHE}/tmp
-	function cleanup()
-	{
-		rm -f ${ENV_BUILD_CACHE}/tmp/credentials.yaml
-	}
-	trap cleanup EXIT
 
-	REG1_USERNAME=`sops --config ${ENV_CONFIG_DIR}/.sops.yaml --output-type dotenv --decrypt --extract '["REG1_USERNAME"]' ${SECRETS_FILE}`
-	
-	export REG1_USERNAME=$${REG1_USERNAME} && envsubst ${REG1_USERNAME} <${ENV_CONFIG_DIR}/hoppr/credentials.yaml >${ENV_BUILD_CACHE}/tmp/credentials.yaml
 
-	rm -f ${ENV_BUILD_CACHE}/hoppr.tar
-	podman run \
-	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/opt/app,z \
-	--mount type=bind,source="${ENV_BUILD_CACHE}",target=/output,z \
-	--env=HOPPR_TRANSFER_CONFIG=/opt/app/hoppr/transfer.yaml \
-	--env=HOPPR_LOG_FILE=/output/hoppr.log \
-	-w /opt/app \
-	--env=HOPPR_CREDS_CONFIG=/output/tmp/credentials.yaml \
-	--env=REG1_PASSWORD=`sops --config ${ENV_CONFIG_DIR}/.sops.yaml --output-type dotenv --decrypt --extract '["REG1_PASSWORD"]' ${SECRETS_FILE}` \
-	docker.io/hoppr/hopctl:latest bundle /opt/app/hoppr/manifest.yaml
-	
-
-# collect rke2 dependencies
-.PHONY: collect-tar-rpm
-collect-tar-rpm: preflight-check
-	mkdir -p ${ENV_BUILD_CACHE}/bin
-	for releasever in 8 ; do \
-	podman run -i -p 5050:5000 --rm --name bundler \
-	-w /workingdir \
-	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir,z \
-	--entrypoint /bin/sh \
-	-e INSTALL_RKE2_VERSION=${RKE2_VERSION} \
-	rockylinux:$${releasever} -c "cp /usr/bin/tar ./.cache/bin"; \
-	done
 
 
 .PHONY: collect-images
@@ -119,6 +83,52 @@ collect-images: preflight-check
 	podman pull registry1.dso.mil/ironbank/opensource/containers/skopeo:latest
 	podman save registry1.dso.mil/ironbank/opensource/containers/skopeo:latest -o ${ENV_BUILD_CACHE}/registry/skopeo.tar
 
+	rm -f ${ENV_BUILD_CACHE}/registry/vault.tar
+	podman pull registry1.dso.mil/ironbank/hashicorp/vault:1.12.3
+	podman save registry1.dso.mil/ironbank/hashicorp/vault:1.12.3 -o ${ENV_BUILD_CACHE}/registry/vault.tar
+
+
+# run hoppr
+.PHONY: hoppr
+hoppr: preflight-check
+	mkdir -p ${ENV_BUILD_CACHE}/tmp
+	function cleanup()
+	{
+		rm -f ${ENV_BUILD_CACHE}/tmp/credentials.yaml
+	}
+	trap cleanup EXIT
+
+	REG1_USERNAME=`sops --config ${ENV_CONFIG_DIR}/.sops.yaml --output-type dotenv --decrypt --extract '["REG1_USERNAME"]' ${SECRETS_FILE}`
+	
+	export REG1_USERNAME=$${REG1_USERNAME} && envsubst ${REG1_USERNAME} <${ENV_CONFIG_DIR}/hoppr/credentials.yaml >${ENV_BUILD_CACHE}/tmp/credentials.yaml
+
+	rm -f ${ENV_BUILD_CACHE}/hoppr.tar
+	podman run \
+	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/opt/app,z \
+	--mount type=bind,source="${ENV_BUILD_CACHE}",target=/opt/app/.cache,z \
+	--env=HOPPR_TRANSFER_CONFIG=/opt/app/hoppr/transfer.yaml \
+	--env=HOPPR_LOG_FILE=/opt/app/.cache/hoppr.log \
+	-w /opt/app \
+	--env=HOPPR_CREDS_CONFIG=/opt/app/.cache/tmp/credentials.yaml \
+	--env=REG1_PASSWORD=`sops --config ${ENV_CONFIG_DIR}/.sops.yaml --output-type dotenv --decrypt --extract '["REG1_PASSWORD"]' ${SECRETS_FILE}` \
+	docker.io/hoppr/hopctl:latest bundle /opt/app/hoppr/manifest.yaml
+	
+
+# collect rke2 dependencies
+.PHONY: collect-tar-rpm
+collect-tar-rpm: preflight-check
+	mkdir -p ${ENV_BUILD_CACHE}/bin
+	for releasever in 8 ; do \
+	podman run -i -p 5050:5000 --rm --name bundler \
+	-w /workingdir \
+	--mount type=bind,source="${ENV_CONFIG_DIR}",target=/workingdir,z \
+	--entrypoint /bin/sh \
+	-e INSTALL_RKE2_VERSION=${RKE2_VERSION} \
+	rockylinux:$${releasever} -c "cp /usr/bin/tar ./.cache/bin"; \
+	done
+
+
+
 
 # build registry database
 # .PHONY: collect-registry-artifacts
@@ -135,7 +145,7 @@ collect-images: preflight-check
 compress-all: preflight-check
 	
 	# compress the tar directory
-	tar -C ${ENV_BUILD_CACHE} -cf ${ENV_BUILD_CACHE}/payload.tar rke2 hoppr.tar registry
+	tar -C ${ENV_BUILD_CACHE} -cf ${ENV_BUILD_CACHE}/payload.tar rke2 hoppr.tar
 	pigz ${ENV_BUILD_CACHE}/payload.tar
 
 	# seed the to_the_airgap.sh with deploy.sh]

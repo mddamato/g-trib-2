@@ -8,9 +8,10 @@ stages:
     - name: "hoppr.core_plugins.collect_docker_plugin"
     - name: "hoppr.core_plugins.collect_git_plugin"
     - name: "hoppr.core_plugins.collect_raw_plugin"
+    - name: "hoppr.core_plugins.collect_helm_plugin"
   Bundle:
     plugins:
     - name: "hoppr.core_plugins.bundle_tar"
       config:
-        tarfile_name: /output/hoppr.tar
+        tarfile_name: /opt/app/.cache/hoppr.tar
         compression: none

@@ -9,6 +9,7 @@ metadata:
 
 sboms:
   - local: sbom.json
+  - local: sbom-vault.json
 
 includes: []
 
@@ -20,3 +21,6 @@ repositories:
   - url: https://registry1.dso.mil
   - url: https://docker.io
   - url: https://quay.io
+
+  helm:
+  - url: https://helm.releases.hashicorp.com/

@@ -1,0 +1,28 @@
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.4",
+    "version": 1,
+    "components": [
+
+
+        {
+            "type": "container",
+            "version": "vault-0.23.0",
+            "name": "vault",
+            "purl": "pkg:helm/vault@0.23.0"
+        },
+        {
+            "type": "file",
+            "name": "vault-values.yaml",
+            "purl": "pkg:generic/helm/vault-values.yaml"
+        },
+
+        {
+            "type": "file",
+            "name": "vault.tar",
+            "purl": "pkg:generic/.cache/registry/vault.tar"
+        }
+
+
+     ]
+}

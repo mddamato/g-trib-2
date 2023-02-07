@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: install-vault-cm
+  namespace: glowing-tribble
+data:
+  script.sh: |
+    #!/bin/bash
+    cat > manifest.yaml <<EOF
+    ---
+    apiVersion: v1
+    kind: Namespace
+    metadata:
+      labels:
+        kubernetes.io/metadata.name: vault
+      name: vault
+    ---
+    apiVersion: helm.cattle.io/v1
+    kind: HelmChart
+    metadata:
+      name: vault
+      namespace: vault
+    spec:
+      chart: hashicorp/vault
+      targetNamespace: vault
+      valuesContent: |-
+    EOF
+    sed -e 's/^/    /' /var/lib/values/vault-values.yaml >> manifest.yaml
+    echo "" >> manifest.yaml
+    echo "  chartContent: |-" >> manifest.yaml
+    cat /var/lib/charts/vault-0.23.0.tgz | base64 -w0 | sed -e 's/^/    /' >> manifest.yaml
+    cat manifest.yaml
+    

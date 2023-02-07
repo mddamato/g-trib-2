@@ -1,0 +1,29 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: registry-glowing-tribble-com
+  namespace: glowing-tribble
+spec:
+  secretName: registry-glowing-tribble-com-tls
+  duration: 8760h
+  renewBefore: 360h
+  subject:
+    organizations:
+      - Glowing-Tribble-Mega-Corporation
+  commonName: registry.glowing-tribble.com
+  isCA: false
+  privateKey:
+    algorithm: ECDSA
+    size: 521
+  usages:
+    - server auth
+    - client auth
+  dnsNames:
+    - registry.glowing-tribble.com
+    - registry.glowing-tribble.svc.cluster.local
+    - www.registry.glowing-tribble.com
+  issuerRef:
+    name:  g-trib-issuer
+    kind: Issuer
+    group: cert-manager.io
