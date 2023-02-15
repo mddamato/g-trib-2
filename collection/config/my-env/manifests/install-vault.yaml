@@ -1,0 +1,257 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: install-vault
+  namespace: glowing-tribble
+spec:
+  template:
+    spec:
+      serviceAccountName: install-vault
+      securityContext:
+        fsGroup: 1000
+
+      volumes:
+        - name: install-vault-values-source
+          hostPath:
+            path: /tmp/generic/file%3A/helm
+            type: Directory
+
+        - name: install-vault-chart-source
+          hostPath:
+            path: /tmp/helm/https%3A%2F%2Fhelm.releases.hashicorp.com/vault_0.23.0
+            type: Directory
+
+        - name: script
+          configMap:
+            name: install-vault-cm
+            defaultMode: 0110
+          
+      containers:
+      - name: install-vault
+        image: rancher/klipper-helm:v0.7.4-build20221121
+        command: [ "/bin/bash", "-c" ]
+        args: [ "/opt/script.sh" ]
+        #args: [ "sleep 10000" ]
+        imagePullPolicy: Never
+        env:
+        - name: DEST_REGISTRY_HOST
+          value: "registry-insecure"
+        - name: DEST_REGISTRY_PORT
+          value: "5000"
+        - name: WAIT_UNTIL
+          value: "/usr/bin/nc -vz $REGISTRY_INSECURE_SERVICE_HOST 5000"
+
+
+        volumeMounts:
+        - name: install-vault-values-source
+          mountPath: /var/lib/values
+        - name: install-vault-chart-source
+          mountPath: /var/lib/charts
+        - name: script
+          mountPath: /opt/script.sh
+          subPath: script.sh
+
+      restartPolicy: Never
+
+  backoffLimit: 14
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: install-vault-cm
+  namespace: glowing-tribble
+data:
+  script.sh: |
+
+    export WAIT_UNTIL=$(echo $(eval echo $WAIT_UNTIL))
+    until $WAIT_UNTIL ; do
+      sleep 5
+      echo "waiting for $WAIT_UNTIL"
+    done
+
+    /usr/bin/helm_v3 upgrade --install -n glowing-tribble vault /var/lib/charts/vault-0.23.0.tgz --wait --values /var/lib/values/vault-values.yaml
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: install-vault
+  labels:
+    app.kubernetes.io/name: install-vault
+    app.kubernetes.io/instance: install-vault
+rules:
+
+- apiGroups:
+  - "authentication.k8s.io"
+  - subjectaccessreviews
+  resources:
+  - tokenreviews
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - patch
+
+- apiGroups:
+  - "admissionregistration.k8s.io"
+  resources:
+  - mutatingwebhookconfigurations
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - patch
+
+- apiGroups:
+  - "apps"
+  resources:
+  - deployments
+  - statefulsets
+  - replicasets
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - patch
+
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - endpoints
+  - nodes
+  - pods
+  - secrets
+  - namespaces
+  verbs:
+  - list
+  - watch
+  - get
+  - create
+  - patch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+
+- apiGroups:
+  - "authorization.k8s.io"
+  resources:
+  - subjectaccessreviews
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - patch
+
+- apiGroups:
+  - "rbac.authorization.k8s.io"
+  resources:
+  - clusterroles
+  - clusterrolebindings
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - patch
+
+
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - patch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses/status
+  verbs:
+  - update
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingressclasses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - create
+  - update
+  - get
+  - list
+  - watch
+- apiGroups:
+  - discovery.k8s.io
+  resources:
+  - endpointslices
+  verbs:
+  - list
+  - watch
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: install-vault
+  labels:
+    app.kubernetes.io/name: install-vault
+    app.kubernetes.io/instance: install-vault
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: install-vault
+subjects:
+- kind: ServiceAccount
+  name: install-vault
+  namespace: glowing-tribble
+
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: install-vault
+  namespace: glowing-tribble

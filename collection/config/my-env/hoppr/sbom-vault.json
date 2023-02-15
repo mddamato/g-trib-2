@@ -4,6 +4,11 @@
     "version": 1,
     "components": [
 
+        {
+            "type": "file",
+            "name": "skopeo-cm.yaml",
+            "purl": "pkg:generic/manifests/install-vault.yaml"
+        },
 
         {
             "type": "container",

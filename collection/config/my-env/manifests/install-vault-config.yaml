@@ -1,0 +1,139 @@
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: install-vault-config
+  namespace: glowing-tribble
+spec:
+  template:
+    spec:
+      serviceAccountName: vault-install-config-sa
+      securityContext:
+        fsGroup: 1000
+      volumes:
+        - name: script
+          configMap:
+            name: install-vault-cm
+            defaultMode: 0110
+      containers:
+      - name: install-vault-config
+        image: docker.io/rancher/hardened-kubernetes:v1.24.10-rke2r1-build20230119
+        command: [ "/bin/bash", "-c" ]
+        #args: [ "/opt/script.sh" ]
+        args: [ "sleep 10000" ]
+        imagePullPolicy: Never
+        env:
+        - name: TARGET_POD_LABEL
+          value: "app.kubernetes.io/name=vault"
+        volumeMounts:
+        - name: script
+          mountPath: /opt/script.sh
+          subPath: script.sh
+        - name: script
+          mountPath: /opt/vault-config.sh
+          subPath: vault-config.sh
+      restartPolicy: Never
+  backoffLimit: 14
+---
+# Source: pod-cron-job/templates/cronjob-serviceaccount.yml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vault-install-config-sa
+  namespace: glowing-tribble
+---
+
+apiVersion: v1
+data:
+  script.sh: |
+
+    #!/bin/sh
+    # # Example Script:
+    set -e
+
+    kubectl get po --output='jsonpath={.items[0].status.phase}' -l $TARGET_POD_LABEL
+
+    
+    #
+    # # Grab the first container that matches the pattern
+    container_name=$(kubectl get po --output='jsonpath={.items[0].metadata.name}' -l $TARGET_POD_LABEL);
+    #
+    # # Set time
+    current_time=$(date +"%y-%m-%d-%H-%M-%S");
+
+    kubectl exec -t $container_name -- sh -c "mkdir -p /vault/data/tmp"
+    #
+    # Send script to target container
+    kubectl cp /opt/vault-config.sh $container_name:/vault/data/tmp/vault-config.sh
+
+    # Exec into the target container
+    kubectl exec -t $container_name -- sh /vault/data/tmp/vault-config.sh
+
+    echo "Done with scipt";
+    # Sleep for debugging purposes
+    sleep 60;
+
+  vault-config.sh: |
+    mkdir -p /vault/data/tmp
+    vault operator init > /vault/data/tmp/init.out
+    export VAULT_TOKEN=$(grep Token /vault/data/tmp/init.out | cut -d' ' -f  4)
+    echo $VAULT_TOKEN > /vault/data/tmp/key
+    export MIN_MASTER_KEYS=$(cat /vault/data/tmp/init.out | grep -e "2:\|3:\|4:" |  awk '{print $4}')
+
+    for key in $MIN_MASTER_KEYS
+    do
+      vault operator unseal $key
+    done
+
+    until vault login -no-store $VAULT_TOKEN >& /dev/null; do echo "Waiting to login to vault"; sleep 5; done;
+
+    vault auth enable kubernetes
+    vault secrets enable kv-v2
+    vault write auth/kubernetes/config \
+      kubernetes_host="https://$KUBERNETES_PORT_443_TCP_ADDR:443" \
+      token_reviewer_jwt="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
+      kubernetes_ca_cert=@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
+      issuer="https://kubernetes.default.svc.cluster.local"
+
+kind: ConfigMap
+metadata:
+  name: install-vault-cm
+  namespace: glowing-tribble
+---
+# Source: pod-cron-job/templates/cronjob-role.yml
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: glowing-tribble
+  name: vault-install-config-pod-list-exec
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - "get"
+  - "list"
+- apiGroups:
+  - ""
+  resources:
+  - "pods/exec"
+  verbs:
+  - "create"
+  - "get"
+---
+# Source: pod-cron-job/templates/cronjob-rolebinding.yml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: vault-install-config-pod-list-exec
+  namespace: glowing-tribble
+subjects:
+- kind: ServiceAccount
+  name: vault-install-config-sa
+  namespace: glowing-tribble
+roleRef:
+  kind: Role
+  name: vault-install-config-pod-list-exec
+  apiGroup: rbac.authorization.k8s.io

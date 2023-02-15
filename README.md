@@ -217,3 +217,27 @@ vault write pki/roles/example-dot-com \
 
 vault write pki/issue/example-dot-com \
     common_name=blah.example.com
+
+
+## vault init
+
+mkdir -p /vault/data/tmp
+vault operator init > /vault/data/tmp/init.out
+export VAULT_TOKEN=$(grep Token /vault/data/tmp/init.out | cut -d' ' -f  4)
+echo $VAULT_TOKEN > /vault/data/tmp/key
+export MIN_MASTER_KEYS=$(cat /vault/data/tmp/init.out | grep -e "2:\|3:\|4:" |  awk '{print $4}')
+
+for key in $MIN_MASTER_KEYS
+do
+  vault operator unseal $key
+done
+
+until vault login -no-store $VAULT_TOKEN >& /dev/null; do echo "Waiting to login to vault"; sleep 5; done;
+
+vault auth enable kubernetes
+
+vault write auth/kubernetes/config \
+  kubernetes_host="https://$KUBERNETES_PORT_443_TCP_ADDR:443" \
+  token_reviewer_jwt="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
+  kubernetes_ca_cert=@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
+  issuer="https://kubernetes.default.svc.cluster.local"   
