@@ -235,7 +235,7 @@ done
 until vault login -no-store $VAULT_TOKEN >& /dev/null; do echo "Waiting to login to vault"; sleep 5; done;
 
 vault auth enable kubernetes
-
+vault secrets enable kv-v2
 vault write auth/kubernetes/config \
   kubernetes_host="https://$KUBERNETES_PORT_443_TCP_ADDR:443" \
   token_reviewer_jwt="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
