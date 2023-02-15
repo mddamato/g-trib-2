@@ -52,9 +52,11 @@ data:
     # # Example Script:
     set -e
 
-    kubectl get po --output='jsonpath={.items[0].status.phase}' -l $TARGET_POD_LABEL
+    while [ "$(kubectl get po -n glowing-tribble --output='jsonpath={.items[0].status.phase}' -l $TARGET_POD_LABEL)" != "Running" ] ; do
+      sleep 5
+      echo "waiting for Running"
+    done;
 
-    
     #
     # # Grab the first container that matches the pattern
     container_name=$(kubectl get po --output='jsonpath={.items[0].metadata.name}' -l $TARGET_POD_LABEL);
